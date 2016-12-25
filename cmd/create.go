@@ -21,24 +21,18 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/q231950/sputnik/eckeyhandling"
+	"fmt"
 )
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Creates a new server-to-server certificate",
+	Long: `For now, a file named eckey.pem will be put into the secrets folder.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("create called")
+		createECKey()
 	},
 }
 
@@ -55,4 +49,18 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+}
+
+func createECKey() {
+	exists := eckeyhandling.ECKeyExists()
+	if exists {
+		fmt.Println("The ec key exists already, this is it:\n")
+		_ = eckeyhandling.ECKey()
+	} else {
+		fmt.Println("The ec key does not exist, need to create, one moment, please\n")
+		eckeyhandling.CreateECKey()
+
+		fmt.Println("Ok, here it is\n")
+		_ = eckeyhandling.ECKey()
+	}
 }

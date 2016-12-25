@@ -24,21 +24,29 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/q231950/sputnik/eckeyhandling"
 )
 
 // eckeyCmd represents the eckey command
 var eckeyCmd = &cobra.Command{
 	Use:   "eckey",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Read the ec key",
+	Long: `The ec key is used for server to server communication between CloudKit and everyone else.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-		fmt.Println("eckey called")
+		keyExists := eckeyhandling.ECKeyExists()
+		if keyExists {
+			_ = eckeyhandling.ECKey()
+		} else {
+			fmt.Println("The ec key does not exist, need to create one... I'll do this for you...\n")
+			createErr := eckeyhandling.CreateECKey()
+			if createErr != nil {
+				fmt.Println("Sorry, failed to create the ec key\n")
+			} else {
+				path, _ := eckeyhandling.SecretsFolder()
+				fmt.Println("Ok, this is your key. It's named eckey.pem and located under", path, "\n")
+				_ = eckeyhandling.ECKey()
+			}
+		}
 	},
 }
 

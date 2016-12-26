@@ -21,3 +21,7 @@ You may print out the key in a CloudKit understandable format. Copy the output a
 [Authenticate Web Service Requests](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloutKitWebServicesReference/SettingUpWebServices/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW9)
 
 `[Current date]:[Request body]:[Web service URL subpath]`
+
+The request's date parameter is required to be within 10 minutes difference to CloudKit.
+
+

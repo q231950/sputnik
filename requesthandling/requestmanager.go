@@ -18,3 +18,6 @@ func (r *RequestManager) PingRequest() (*http.Request, error) {
 
 	return request, err
 }
+func (r *RequestManager) payload(date string, body string, service string) string {
+	return ""
+}

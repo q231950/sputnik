@@ -33,3 +33,11 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 		t.Errorf("The data parameter must not differ by more than a second from now")
 	}
 }
+
+func TestPayloadFormat(t *testing.T) {
+	requestManager := RequestManager{}
+	payload := requestManager.payload("date", "body", "service url")
+	if payload != "date:body:service url" {
+		t.Errorf("The request payload needs to be properly formatted")
+	}
+}

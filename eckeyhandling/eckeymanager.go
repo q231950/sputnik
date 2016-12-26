@@ -36,7 +36,7 @@ func ECKey() string {
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
-	
+
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 
 	var output bytes.Buffer

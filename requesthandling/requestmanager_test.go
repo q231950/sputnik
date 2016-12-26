@@ -24,13 +24,13 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
 	expectedTime := time.Now()
-	roundedExpectedTime := expectedTime.Round(time.Second)
+	roundedExpectedTime := expectedTime.Round(time.Minute)
 
 	actualTime, _ := time.Parse("2006-01-02T15:04:05MST-0700", dateString)
-	roundedTime := actualTime.Round(time.Second)
+	roundedTime := actualTime.Round(time.Minute)
 
 	if !roundedExpectedTime.Equal(roundedTime) {
-		t.Errorf("The data parameter must not differ by more than a second from now")
+		t.Errorf("The date parameter must not differ by more than a minute from now")
 	}
 }
 

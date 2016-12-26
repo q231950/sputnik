@@ -1,15 +1,15 @@
 package eckeyhandling
 
 import (
-	"os"
-	"strings"
-	"fmt"
-	"os/user"
-	"log"
-	"os/exec"
-	"sync"
 	"bytes"
+	"fmt"
 	"io"
+	"log"
+	"os"
+	"os/exec"
+	"os/user"
+	"strings"
+	"sync"
 )
 
 func ECKeyExists() bool {
@@ -46,17 +46,17 @@ func ECKey() string {
 	writer := io.MultiWriter(os.Stdout, &output)
 
 	waitGroup.Add(1)
-    go func() {
-        defer waitGroup.Done()
-        io.Copy(writer, stdout)
-    }()
+	go func() {
+		defer waitGroup.Done()
+		io.Copy(writer, stdout)
+	}()
 
-  err := command.Run()
+	err := command.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-  waitGroup.Wait()
-  return output.String()
+	waitGroup.Wait()
+	return output.String()
 }
 
 func CreateECKey() error {
@@ -94,7 +94,7 @@ func SecretsFolder() (string, error) {
 		// secrets folder doesn't exist
 		fmt.Println(err)
 		path, createErr := createSecretsFolder(configFolder)
-		return  path, createErr
+		return path, createErr
 	}
 
 	return file.Name(), err

@@ -21,16 +21,16 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/q231950/sputnik/eckeyhandling"
 	"fmt"
+	"github.com/q231950/sputnik/eckeyhandling"
+	"github.com/spf13/cobra"
 )
 
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates a new server-to-server certificate",
-	Long: `For now, a file named eckey.pem will be put into the secrets folder.`,
+	Long:  `For now, a file named eckey.pem will be put into the secrets folder.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		createECKey()
 	},

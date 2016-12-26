@@ -23,15 +23,15 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/q231950/sputnik/eckeyhandling"
+	"github.com/spf13/cobra"
 )
 
 // eckeyCmd represents the eckey command
 var eckeyCmd = &cobra.Command{
 	Use:   "eckey",
 	Short: "Read the ec key",
-	Long: `The ec key is used for server to server communication between CloudKit and everyone else.`,
+	Long:  `The ec key is used for server to server communication between CloudKit and everyone else.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyExists := eckeyhandling.ECKeyExists()
 		if keyExists {

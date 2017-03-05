@@ -48,7 +48,7 @@ func createECKey() {
 		_ = keyManager.ECKey()
 	} else {
 		fmt.Println("The ec key does not exist, need to create, one moment, please\n")
-		keyManager.CreateECKey()
+		keyManager.CreateSigningIdentity()
 
 		fmt.Println("Ok, here it is\n")
 		_ = keyManager.ECKey()

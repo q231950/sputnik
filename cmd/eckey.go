@@ -39,7 +39,7 @@ var eckeyCmd = &cobra.Command{
 			_ = keyManager.ECKey()
 		} else {
 			fmt.Println("The ec key does not exist, need to create one... I'll do this for you...\n")
-			createErr := keyManager.CreateECKey()
+			createErr := keyManager.CreateSigningIdentity()
 			if createErr != nil {
 				fmt.Println("Sorry, failed to create the ec key\n")
 			} else {

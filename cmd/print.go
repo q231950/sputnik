@@ -46,7 +46,7 @@ to quickly create a Cobra application.`,
 			// fmt.Println(reader.String())
 		} else {
 			fmt.Println("The ec key does not exist, need to create, one moment, please\n")
-			keyManager.CreateECKey()
+			keyManager.CreateSigningIdentity()
 
 			fmt.Println("Ok done. Printing it\n")
 			_ = keyManager.PrivatePublicKeyWriter()

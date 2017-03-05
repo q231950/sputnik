@@ -164,7 +164,7 @@ func (k *KeyManager) ECKey() string {
 	return output.String()
 }
 
-func (k *KeyManager) CreateECKey() error {
+func (k *KeyManager) CreateSigningIdentity() error {
 	pemFilePath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)

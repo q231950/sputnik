@@ -1,4 +1,4 @@
-package eckeyhandling
+package keymanager
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -18,16 +19,42 @@ import (
 )
 
 type KeyManager struct {
+	pemFileName string
+	derFileName string
+}
+
+func New() KeyManager {
+	return KeyManager{pemFileName: "eckey.pem", derFileName: "cert.der"}
 }
 
 func (k *KeyManager) KeyId() string {
 	return "abc"
 }
 
+func (k *KeyManager) PrivateKey() *ecdsa.PrivateKey {
+	fmt.Println("get the private key from me")
+
+	path, err := k.derFilePath()
+	if err != nil {
+		log.Fatal("No der file found. create one by `sputnik eckey create`")
+	}
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal("Failed to read der file at path: ", path)
+	}
+
+	privateKey, err := x509.ParseECPrivateKey(bytes)
+	if err != nil {
+		log.Fatal("Failed to parse private ec key from pem: ", err)
+	}
+
+	return privateKey
+}
+
 func (k *KeyManager) PublicKey() *ecdsa.PublicKey {
 	fmt.Println("get the public key from me")
 
-	pemString := PrivatePublicKeyWriter()
+	pemString := k.PrivatePublicKeyWriter()
 	pemData := []byte(pemString)
 	block, rest := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
@@ -56,8 +83,8 @@ func (k *KeyManager) PublicKey() *ecdsa.PublicKey {
 	return nil
 }
 
-func PrivatePublicKeyWriter() string {
-	ecKeyPath, pathErr := ecKeyPath()
+func (k *KeyManager) PrivatePublicKeyWriter() string {
+	ecKeyPath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
@@ -85,8 +112,8 @@ func PrivatePublicKeyWriter() string {
 	return output.String()
 }
 
-func ECKeyExists() bool {
-	ecKeyPath, err := ecKeyPath()
+func (k *KeyManager) ECKeyExists() bool {
+	ecKeyPath, err := k.pemFilePath()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -99,13 +126,18 @@ func ECKeyExists() bool {
 	return file != nil && openError == nil
 }
 
-func ecKeyPath() (string, error) {
-	secretsFolder, err := SecretsFolder()
-	return secretsFolder + "/eckey.pem", err
+func (k *KeyManager) derFilePath() (string, error) {
+	secretsFolder, err := k.SecretsFolder()
+	return secretsFolder + "/" + k.derFileName, err
 }
 
-func ECKey() string {
-	ecKeyPath, pathErr := ecKeyPath()
+func (k *KeyManager) pemFilePath() (string, error) {
+	secretsFolder, err := k.SecretsFolder()
+	return secretsFolder + "/" + k.pemFileName, err
+}
+
+func (k *KeyManager) ECKey() string {
+	ecKeyPath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
@@ -132,14 +164,33 @@ func ECKey() string {
 	return output.String()
 }
 
-func CreateECKey() error {
-	ecKeyPath, pathErr := ecKeyPath()
+func (k *KeyManager) CreateECKey() error {
+	pemFilePath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
 
-	command := exec.Command("openssl", "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", ecKeyPath)
+	// create pem
+	command := exec.Command("openssl", "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", pemFilePath)
 	err := command.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = command.Wait()
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+	}
+
+	// create der from pem
+	// openssl ec -outform der -in eckey.pem -out cert.der
+	derFilePath, pathErr := k.derFilePath()
+	if pathErr != nil {
+		log.Fatal(pathErr)
+	}
+
+	command = exec.Command("openssl", "ec", "der", "-in", k.pemFileName, "-out", k.derFileName, derFilePath)
+	err = command.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -152,7 +203,7 @@ func CreateECKey() error {
 	return err
 }
 
-func SecretsFolder() (string, error) {
+func (k *KeyManager) SecretsFolder() (string, error) {
 	homeDir, err := homeDir()
 	if err != nil {
 		// can't find home directory

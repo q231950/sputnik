@@ -22,7 +22,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/q231950/sputnik/eckeyhandling"
+	"github.com/q231950/sputnik/keymanager"
 	"github.com/q231950/sputnik/requesthandling"
 	"github.com/spf13/cobra"
 	"log"
@@ -39,7 +39,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		keyManager := eckeyhandling.KeyManager{}
+		keyManager := keymanager.New()
 		requestManager := requesthandling.RequestManager{keyManager}
 		request, err := requestManager.PingRequest()
 		if err == nil {

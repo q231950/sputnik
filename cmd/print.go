@@ -22,35 +22,38 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
 
-// createCmd represents the create command
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Creates a new server-to-server certificate",
-	Long:  `For now, a file named eckey.pem will be put into the secrets folder.`,
+// printCmd represents the print command
+var printCmd = &cobra.Command{
+	Use:   "print",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		createECKey()
+		keyManager := keymanager.New()
+		exists := keyManager.ECKeyExists()
+		if exists {
+			fmt.Println("Printing the public/private keys:\n")
+			_ = keyManager.PrivatePublicKeyWriter()
+			// fmt.Println(reader.String())
+		} else {
+			fmt.Println("The ec key does not exist, need to create, one moment, please\n")
+			keyManager.CreateECKey()
+
+			fmt.Println("Ok done. Printing it\n")
+			_ = keyManager.PrivatePublicKeyWriter()
+		}
 	},
 }
 
 func init() {
-	eckeyCmd.AddCommand(createCmd)
-}
-
-func createECKey() {
-	keyManager := keymanager.New()
-	exists := keyManager.ECKeyExists()
-	if exists {
-		fmt.Println("The ec key exists already, this is it:\n")
-		_ = keyManager.ECKey()
-	} else {
-		fmt.Println("The ec key does not exist, need to create, one moment, please\n")
-		keyManager.CreateECKey()
-
-		fmt.Println("Ok, here it is\n")
-		_ = keyManager.ECKey()
-	}
+	eckeyCmd.AddCommand(printCmd)
 }

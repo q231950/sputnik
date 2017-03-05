@@ -23,7 +23,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/q231950/sputnik/eckeyhandling"
+	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
 
@@ -33,18 +33,19 @@ var eckeyCmd = &cobra.Command{
 	Short: "Read the ec key",
 	Long:  `The ec key is used for server to server communication between CloudKit and everyone else.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		keyExists := eckeyhandling.ECKeyExists()
+		keyManager := keymanager.New()
+		keyExists := keyManager.ECKeyExists()
 		if keyExists {
-			_ = eckeyhandling.ECKey()
+			_ = keyManager.ECKey()
 		} else {
 			fmt.Println("The ec key does not exist, need to create one... I'll do this for you...\n")
-			createErr := eckeyhandling.CreateECKey()
+			createErr := keyManager.CreateECKey()
 			if createErr != nil {
 				fmt.Println("Sorry, failed to create the ec key\n")
 			} else {
-				path, _ := eckeyhandling.SecretsFolder()
+				path, _ := keyManager.SecretsFolder()
 				fmt.Println("Ok, this is your key. It's named eckey.pem and located under", path, "\n")
-				_ = eckeyhandling.ECKey()
+				_ = keyManager.ECKey()
 			}
 		}
 	},

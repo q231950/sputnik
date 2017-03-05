@@ -2,14 +2,14 @@ package requesthandling
 
 import (
 	"fmt"
-	"github.com/q231950/sputnik/eckeyhandling"
+	"github.com/q231950/sputnik/keymanager"
 	"net/http"
 	"strings"
 	"time"
 )
 
 type RequestManager struct {
-	KeyManager eckeyhandling.KeyManager
+	KeyManager keymanager.KeyManager
 }
 
 func (r *RequestManager) PingRequest() (*http.Request, error) {
@@ -27,6 +27,9 @@ func (r *RequestManager) PingRequest() (*http.Request, error) {
 
 	publicKey := r.KeyManager.PublicKey()
 	fmt.Println(publicKey)
+
+	privateKey := r.KeyManager.PrivateKey()
+	fmt.Println(privateKey)
 
 	return request, err
 }

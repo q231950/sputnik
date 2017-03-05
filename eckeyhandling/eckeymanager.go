@@ -2,6 +2,11 @@ package eckeyhandling
 
 import (
 	"bytes"
+	"crypto/dsa"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +16,74 @@ import (
 	"strings"
 	"sync"
 )
+
+type KeyManager struct {
+}
+
+func (k *KeyManager) KeyId() string {
+	return "abc"
+}
+
+func (k *KeyManager) PublicKey() *ecdsa.PublicKey {
+	fmt.Println("get the public key from me")
+
+	pemString := PrivatePublicKeyWriter()
+	pemData := []byte(pemString)
+	block, rest := pem.Decode(pemData)
+	if block == nil || block.Type != "PUBLIC KEY" {
+		log.Fatal("failed to decode PEM block containing public key")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Got a %T, with remaining data: %q", pub, rest)
+
+	switch pub := pub.(type) {
+	case *rsa.PublicKey:
+		fmt.Println("pub is of type RSA:", pub)
+	case *dsa.PublicKey:
+		fmt.Println("pub is of type DSA:", pub)
+	case *ecdsa.PublicKey:
+		fmt.Println("pub is of type ECDSA:", pub)
+		return pub
+	default:
+		panic("unknown type of public key")
+	}
+
+	return nil
+}
+
+func PrivatePublicKeyWriter() string {
+	ecKeyPath, pathErr := ecKeyPath()
+	if pathErr != nil {
+		log.Fatal(pathErr)
+	}
+
+	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
+
+	var output bytes.Buffer
+	var waitGroup sync.WaitGroup
+
+	stdout, _ := command.StdoutPipe()
+	writer := io.MultiWriter(os.Stdout, &output)
+
+	waitGroup.Add(1)
+	go func() {
+		defer waitGroup.Done()
+		io.Copy(writer, stdout)
+	}()
+
+	err := command.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	waitGroup.Wait()
+
+	return output.String()
+}
 
 func ECKeyExists() bool {
 	ecKeyPath, err := ecKeyPath()

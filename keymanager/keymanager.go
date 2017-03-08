@@ -165,16 +165,26 @@ func (k *KeyManager) ECKey() string {
 }
 
 func (k *KeyManager) CreateSigningIdentity() error {
+	err := k.createPemEncodedCertificate()
+	if err != nil {
+		return err
+	}
+
+	err = k.createDerEncodedCertificate()
+
+	return err
+}
+
+func (k *KeyManager) createPemEncodedCertificate() error {
 	pemFilePath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
 
-	// create pem
 	command := exec.Command("openssl", "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", pemFilePath)
 	err := command.Start()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to create pem encoded certificate", err)
 	}
 
 	err = command.Wait()
@@ -182,17 +192,19 @@ func (k *KeyManager) CreateSigningIdentity() error {
 		log.Printf("Command finished with error: %v", err)
 	}
 
-	// create der from pem
-	// openssl ec -outform der -in eckey.pem -out cert.der
+	return err
+}
+
+func (k *KeyManager) createDerEncodedCertificate() error {
 	derFilePath, pathErr := k.derFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
 	}
 
-	command = exec.Command("openssl", "ec", "der", "-in", k.pemFileName, "-out", k.derFileName, derFilePath)
-	err = command.Start()
+	command := exec.Command("openssl", "ec", "der", "-in", k.pemFileName, "-out", k.derFileName, derFilePath)
+	err := command.Start()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to create der encoded certificate", err)
 	}
 
 	err = command.Wait()

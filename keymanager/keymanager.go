@@ -18,20 +18,26 @@ import (
 	"sync"
 )
 
-type KeyManager struct {
+type KeyManager interface {
+	PublicKey() *ecdsa.PublicKey
+	PrivateKey() *ecdsa.PrivateKey
+	KeyId() string
+}
+
+type CloudkitKeyManager struct {
 	pemFileName string
 	derFileName string
 }
 
-func New() KeyManager {
-	return KeyManager{pemFileName: "eckey.pem", derFileName: "cert.der"}
+func New() CloudkitKeyManager {
+	return CloudkitKeyManager{pemFileName: "eckey.pem", derFileName: "cert.der"}
 }
 
-func (k *KeyManager) KeyId() string {
+func (k CloudkitKeyManager) KeyId() string {
 	return "abc"
 }
 
-func (k *KeyManager) PrivateKey() *ecdsa.PrivateKey {
+func (k CloudkitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	fmt.Println("get the private key from me")
 
 	path, err := k.derFilePath()
@@ -51,7 +57,7 @@ func (k *KeyManager) PrivateKey() *ecdsa.PrivateKey {
 	return privateKey
 }
 
-func (k *KeyManager) PublicKey() *ecdsa.PublicKey {
+func (k CloudkitKeyManager) PublicKey() *ecdsa.PublicKey {
 	fmt.Println("get the public key from me")
 
 	pemString := k.PrivatePublicKeyWriter()
@@ -83,7 +89,7 @@ func (k *KeyManager) PublicKey() *ecdsa.PublicKey {
 	return nil
 }
 
-func (k *KeyManager) PrivatePublicKeyWriter() string {
+func (k *CloudkitKeyManager) PrivatePublicKeyWriter() string {
 	ecKeyPath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
@@ -112,7 +118,7 @@ func (k *KeyManager) PrivatePublicKeyWriter() string {
 	return output.String()
 }
 
-func (k *KeyManager) ECKeyExists() bool {
+func (k *CloudkitKeyManager) ECKeyExists() bool {
 	ecKeyPath, err := k.pemFilePath()
 	if err != nil {
 		fmt.Println(err)
@@ -126,17 +132,17 @@ func (k *KeyManager) ECKeyExists() bool {
 	return file != nil && openError == nil
 }
 
-func (k *KeyManager) derFilePath() (string, error) {
+func (k *CloudkitKeyManager) derFilePath() (string, error) {
 	secretsFolder, err := k.SecretsFolder()
 	return secretsFolder + "/" + k.derFileName, err
 }
 
-func (k *KeyManager) pemFilePath() (string, error) {
+func (k *CloudkitKeyManager) pemFilePath() (string, error) {
 	secretsFolder, err := k.SecretsFolder()
 	return secretsFolder + "/" + k.pemFileName, err
 }
 
-func (k *KeyManager) ECKey() string {
+func (k *CloudkitKeyManager) ECKey() string {
 	ecKeyPath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
@@ -164,7 +170,7 @@ func (k *KeyManager) ECKey() string {
 	return output.String()
 }
 
-func (k *KeyManager) CreateSigningIdentity() error {
+func (k *CloudkitKeyManager) CreateSigningIdentity() error {
 	err := k.createPemEncodedCertificate()
 	if err != nil {
 		return err
@@ -175,7 +181,7 @@ func (k *KeyManager) CreateSigningIdentity() error {
 	return err
 }
 
-func (k *KeyManager) createPemEncodedCertificate() error {
+func (k *CloudkitKeyManager) createPemEncodedCertificate() error {
 	pemFilePath, pathErr := k.pemFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
@@ -195,7 +201,7 @@ func (k *KeyManager) createPemEncodedCertificate() error {
 	return err
 }
 
-func (k *KeyManager) createDerEncodedCertificate() error {
+func (k *CloudkitKeyManager) createDerEncodedCertificate() error {
 	derFilePath, pathErr := k.derFilePath()
 	if pathErr != nil {
 		log.Fatal(pathErr)
@@ -215,7 +221,7 @@ func (k *KeyManager) createDerEncodedCertificate() error {
 	return err
 }
 
-func (k *KeyManager) SecretsFolder() (string, error) {
+func (k *CloudkitKeyManager) SecretsFolder() (string, error) {
 	homeDir, err := homeDir()
 	if err != nil {
 		// can't find home directory

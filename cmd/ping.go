@@ -40,7 +40,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		requestManager := requesthandling.RequestManager{keyManager}
+		requestManager := requesthandling.CloudkitRequestManager{keyManager}
 		request, err := requestManager.PingRequest()
 		if err == nil {
 			fmt.Println(request)

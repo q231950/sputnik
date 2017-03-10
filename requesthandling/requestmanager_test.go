@@ -1,12 +1,14 @@
 package requesthandling
 
 import (
+	"github.com/q231950/sputnik/keymanager/mocks"
 	"testing"
 	"time"
 )
 
 func TestPingRequest(t *testing.T) {
-	requestManager := RequestManager{}
+	keyManager := keymanager.MockKeyManager{}
+	requestManager := CloudkitRequestManager{keyManager}
 	request, err := requestManager.PingRequest()
 
 	if request == nil {
@@ -19,7 +21,8 @@ func TestPingRequest(t *testing.T) {
 }
 
 func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
-	requestManager := RequestManager{}
+	keyManager := keymanager.MockKeyManager{}
+	requestManager := CloudkitRequestManager{keyManager}
 	request, _ := requestManager.PingRequest()
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
@@ -35,7 +38,8 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 }
 
 func TestPayloadFormat(t *testing.T) {
-	requestManager := RequestManager{}
+	keyManager := keymanager.MockKeyManager{}
+	requestManager := CloudkitRequestManager{keyManager}
 	payload := requestManager.payload("date", "body", "service url")
 	if payload != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")

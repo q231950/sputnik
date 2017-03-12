@@ -96,27 +96,12 @@ func (k *CloudkitKeyManager) PrivatePublicKeyWriter() string {
 	}
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
-
-	var output bytes.Buffer
-	var waitGroup sync.WaitGroup
-
-	stdout, _ := command.StdoutPipe()
-	writer := io.MultiWriter(os.Stdout, &output)
-
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
-		io.Copy(writer, stdout)
-	}()
-
-	err := command.Run()
+	bytes, err := command.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	waitGroup.Wait()
-
-	return output.String()
-}
+	return string(bytes)
+	}
 
 func (k *CloudkitKeyManager) ECKeyExists() bool {
 	ecKeyPath, err := k.pemFilePath()

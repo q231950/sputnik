@@ -58,11 +58,9 @@ func (k CloudkitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 }
 
 func (k CloudkitKeyManager) PublicKey() *ecdsa.PublicKey {
-	fmt.Println("get the public key from me")
-
 	pemString := k.PrivatePublicKeyWriter()
 	pemData := []byte(pemString)
-	block, rest := pem.Decode(pemData)
+	block, _ := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
 		log.Fatal("failed to decode PEM block containing public key")
 	}
@@ -72,15 +70,12 @@ func (k CloudkitKeyManager) PublicKey() *ecdsa.PublicKey {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Got a %T, with remaining data: %q", pub, rest)
-
 	switch pub := pub.(type) {
 	case *rsa.PublicKey:
 		fmt.Println("pub is of type RSA:", pub)
 	case *dsa.PublicKey:
 		fmt.Println("pub is of type DSA:", pub)
 	case *ecdsa.PublicKey:
-		fmt.Println("pub is of type ECDSA:", pub)
 		return pub
 	default:
 		panic("unknown type of public key")

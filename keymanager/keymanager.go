@@ -25,32 +25,47 @@ type KeyManager interface {
 	PrivateKey() *ecdsa.PrivateKey
 	KeyId() string
 	RemoveSigningIdentity() error
+	StoreKeyId(key string) error
 }
 
 type CloudkitKeyManager struct {
 	pemFileName string
 	derFileName string
+	keyIdFileName string
 }
 
 func New() CloudkitKeyManager {
-	return CloudkitKeyManager{pemFileName: "eckey.pem", derFileName: "cert.der"}
+	return CloudkitKeyManager{pemFileName: "eckey.pem", derFileName: "cert.der", keyIdFileName: "keyid.txt"}
 }
 
 func (k CloudkitKeyManager) KeyId() string {
 	keyId := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
 	if len(keyId) <= 0 {
 		// no KeyId found in environment variables
-		keyId := k.storedKeyId()
-		if len(keyId) <= 0 {
+		keyId, err := k.storedKeyId()
+		if err != nil {
 			// no KeyId stored, none in env var, so it's missing
 			log.Warn("No Cloudkit KeyId specified. Please either provide one by `sputnik keyid store <your KeyId>`.")
+			log.Fatal(err)
 		}
+		return keyId
 	}
 	return keyId
 }
 
-func (k CloudkitKeyManager) storedKeyId() string {
-	return ""
+func (c CloudkitKeyManager) StoreKeyId(key string) error {
+	path := c.keyIdFilePath()
+	keyBytes := []byte(key)
+	return ioutil.WriteFile(path, keyBytes, 0644)
+}
+
+func (c CloudkitKeyManager) storedKeyId() (string, error) {
+	path := c.keyIdFilePath()
+	keyBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(keyBytes), nil
 }
 
 func (k CloudkitKeyManager) PrivateKey() *ecdsa.PrivateKey {
@@ -104,7 +119,7 @@ func (k *CloudkitKeyManager) PrivatePublicKeyWriter() string {
 		log.Fatal(err)
 	}
 	return string(bytes)
-	}
+}
 
 func (k *CloudkitKeyManager) SigningIdentityExists() bool {
 	ecKeyPath := k.pemFilePath()
@@ -115,6 +130,11 @@ func (k *CloudkitKeyManager) SigningIdentityExists() bool {
 	}
 
 	return file != nil && openError == nil
+}
+
+func (k *CloudkitKeyManager) keyIdFilePath() string {
+	secretsFolder := k.SecretsFolder()
+	return secretsFolder + "/" + k.keyIdFileName
 }
 
 func (k *CloudkitKeyManager) derFilePath() string {

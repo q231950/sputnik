@@ -33,13 +33,8 @@ import (
 // pingCmd represents the ping command
 var pingCmd = &cobra.Command{
 	Use:   "ping",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Send a request to cloudkit if at least something works",
+	Long: `Ping creates a GET request and sends it off`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
 		requestManager := requesthandling.CloudkitRequestManager{&keyManager}
@@ -49,9 +44,6 @@ to quickly create a Cobra application.`,
 		} else {
 			log.Fatal("Failed to create ping request")
 		}
-
-		// hah, err := ioutil.ReadAll(request.Body)
-		// fmt.Println(string(hah))
 
 		client := &http.Client{}
     resp, err := client.Do(request)

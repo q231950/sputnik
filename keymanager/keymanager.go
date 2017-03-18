@@ -10,18 +10,21 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"os/user"
 	"strings"
 	"sync"
+	log "github.com/Sirupsen/logrus"
 )
+
+const KeyIdEnvironmentVariableName = string("SPUTNIK_CLOUDKIT_KEYID")
 
 type KeyManager interface {
 	PublicKey() *ecdsa.PublicKey
 	PrivateKey() *ecdsa.PrivateKey
 	KeyId() string
+	RemoveSigningIdentity() error
 }
 
 type CloudkitKeyManager struct {
@@ -34,19 +37,27 @@ func New() CloudkitKeyManager {
 }
 
 func (k CloudkitKeyManager) KeyId() string {
-	return "abc"
+	keyId := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
+	if len(keyId) <= 0 {
+		// no KeyId found in environment variables
+		keyId := k.storedKeyId()
+		if len(keyId) <= 0 {
+			// no KeyId stored, none in env var, so it's missing
+			log.Warn("No Cloudkit KeyId specified. Please either provide one by `sputnik keyid store <your KeyId>`.")
+		}
+	}
+	return keyId
+}
+
+func (k CloudkitKeyManager) storedKeyId() string {
+	return ""
 }
 
 func (k CloudkitKeyManager) PrivateKey() *ecdsa.PrivateKey {
-	fmt.Println("get the private key from me")
-
-	path, err := k.derFilePath()
-	if err != nil {
-		log.Fatal("No der file found. create one by `sputnik eckey create`")
-	}
+	path := k.derFilePath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal("Failed to read der file at path: ", path)
+		log.Fatal("No der file found. create one by `sputnik eckey create`")
 	}
 
 	privateKey, err := x509.ParseECPrivateKey(bytes)
@@ -85,10 +96,7 @@ func (k CloudkitKeyManager) PublicKey() *ecdsa.PublicKey {
 }
 
 func (k *CloudkitKeyManager) PrivatePublicKeyWriter() string {
-	ecKeyPath, pathErr := k.pemFilePath()
-	if pathErr != nil {
-		log.Fatal(pathErr)
-	}
+	ecKeyPath := k.pemFilePath()
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 	bytes, err := command.Output()
@@ -98,11 +106,8 @@ func (k *CloudkitKeyManager) PrivatePublicKeyWriter() string {
 	return string(bytes)
 	}
 
-func (k *CloudkitKeyManager) ECKeyExists() bool {
-	ecKeyPath, err := k.pemFilePath()
-	if err != nil {
-		fmt.Println(err)
-	}
+func (k *CloudkitKeyManager) SigningIdentityExists() bool {
+	ecKeyPath := k.pemFilePath()
 
 	file, openError := os.Open(ecKeyPath)
 	if openError != nil {
@@ -112,21 +117,18 @@ func (k *CloudkitKeyManager) ECKeyExists() bool {
 	return file != nil && openError == nil
 }
 
-func (k *CloudkitKeyManager) derFilePath() (string, error) {
-	secretsFolder, err := k.SecretsFolder()
-	return secretsFolder + "/" + k.derFileName, err
+func (k *CloudkitKeyManager) derFilePath() string {
+	secretsFolder := k.SecretsFolder()
+	return secretsFolder + "/" + k.derFileName
 }
 
-func (k *CloudkitKeyManager) pemFilePath() (string, error) {
-	secretsFolder, err := k.SecretsFolder()
-	return secretsFolder + "/" + k.pemFileName, err
+func (k *CloudkitKeyManager) pemFilePath() string {
+	secretsFolder := k.SecretsFolder()
+	return secretsFolder + "/" + k.pemFileName
 }
 
 func (k *CloudkitKeyManager) ECKey() string {
-	ecKeyPath, pathErr := k.pemFilePath()
-	if pathErr != nil {
-		log.Fatal(pathErr)
-	}
+	ecKeyPath := k.pemFilePath()
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 
@@ -161,11 +163,22 @@ func (k *CloudkitKeyManager) CreateSigningIdentity() error {
 	return err
 }
 
-func (k *CloudkitKeyManager) createPemEncodedCertificate() error {
-	pemFilePath, pathErr := k.pemFilePath()
-	if pathErr != nil {
-		log.Fatal(pathErr)
+func (k *CloudkitKeyManager) RemoveSigningIdentity() error {
+	removePemCommand := exec.Command("rm", k.pemFilePath())
+	err := removePemCommand.Run()
+	if err != nil {
+		return err
 	}
+
+	removeDerCommand := exec.Command("rm", k.derFilePath())
+	err = removeDerCommand.Run()
+
+	return err
+}
+
+func (k *CloudkitKeyManager) createPemEncodedCertificate() error {
+	fmt.Println("Creating PEM...")
+	pemFilePath := k.pemFilePath()
 
 	command := exec.Command("openssl", "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", pemFilePath)
 	err := command.Start()
@@ -178,48 +191,42 @@ func (k *CloudkitKeyManager) createPemEncodedCertificate() error {
 		log.Printf("Command finished with error: %v", err)
 	}
 
+	fmt.Println("Done creating PEM")
+
 	return err
 }
 
 func (k *CloudkitKeyManager) createDerEncodedCertificate() error {
-	derFilePath, pathErr := k.derFilePath()
-	if pathErr != nil {
-		log.Fatal(pathErr)
-	}
+	fmt.Println("Creating DER...", k.pemFileName, k.derFileName, k.SecretsFolder())
+	inPathPem := k.SecretsFolder() + "/" + k.pemFileName
+	outPathDer := k.SecretsFolder() + "/" + k.derFileName
+	command := exec.Command("openssl", "ec", "-outform", "der", "-in", inPathPem, "-out", outPathDer)
 
-	command := exec.Command("openssl", "ec", "der", "-in", k.pemFileName, "-out", k.derFileName, derFilePath)
-	err := command.Start()
+	err := command.Run()
 	if err != nil {
 		log.Fatal("Failed to create der encoded certificate", err)
-	}
-
-	err = command.Wait()
-	if err != nil {
-		log.Printf("Command finished with error: %v", err)
 	}
 
 	return err
 }
 
-func (k *CloudkitKeyManager) SecretsFolder() (string, error) {
-	homeDir, err := homeDir()
-	if err != nil {
-		// can't find home directory
-		fmt.Println(err)
-	}
+func (k *CloudkitKeyManager) SecretsFolder() string {
+	homeDir := homeDir()
 
 	components := []string{homeDir, ".sputnik", "secrets"}
 	configFolder := strings.Join(components, "/")
 
 	file, err := os.Open(configFolder)
 	if err != nil {
-		// secrets folder doesn't exist
-		fmt.Println(err)
+		// secrets folder doesn't exist yet, so create it
 		path, createErr := createSecretsFolder(configFolder)
-		return path, createErr
+		if createErr != nil {
+			fmt.Println(createErr)
+		}
+		return path
 	}
 
-	return file.Name(), err
+	return file.Name()
 }
 
 func createSecretsFolder(in string) (string, error) {
@@ -227,12 +234,12 @@ func createSecretsFolder(in string) (string, error) {
 	return in, os.MkdirAll(in, os.FileMode(mode))
 }
 
-func homeDir() (string, error) {
+func homeDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		// can't get current user
 		fmt.Println(err)
 	}
 
-	return usr.HomeDir, err
+	return usr.HomeDir
 }

@@ -34,7 +34,7 @@ var eckeyCmd = &cobra.Command{
 	Long:  `The ec key is used for server to server communication between CloudKit and everyone else.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		keyExists := keyManager.ECKeyExists()
+		keyExists := keyManager.SigningIdentityExists()
 		if keyExists {
 			_ = keyManager.ECKey()
 		} else {
@@ -43,7 +43,7 @@ var eckeyCmd = &cobra.Command{
 			if createErr != nil {
 				fmt.Println("Sorry, failed to create the ec key\n")
 			} else {
-				path, _ := keyManager.SecretsFolder()
+				path := keyManager.SecretsFolder()
 				fmt.Println("Ok, this is your key. It's named eckey.pem and located under", path, "\n")
 				_ = keyManager.ECKey()
 			}

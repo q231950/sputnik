@@ -42,7 +42,7 @@ func init() {
 
 func createECKey() {
 	keyManager := keymanager.New()
-	exists := keyManager.ECKeyExists()
+	exists := keyManager.SigningIdentityExists()
 	if exists {
 		fmt.Println("The ec key exists already, this is it:\n")
 		_ = keyManager.ECKey()

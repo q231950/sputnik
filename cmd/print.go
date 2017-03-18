@@ -39,7 +39,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		exists := keyManager.ECKeyExists()
+		exists := keyManager.SigningIdentityExists()
 		if exists {
 			fmt.Println("Printing the public/private keys:\n")
 			_ = keyManager.PrivatePublicKeyWriter()

@@ -1,11 +1,16 @@
 package requesthandling
 
 import (
-	"fmt"
+	"bytes"
+	"crypto"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"github.com/q231950/sputnik/keymanager"
 	"net/http"
 	"strings"
 	"time"
+	log "github.com/Sirupsen/logrus"
 )
 
 type RequestManager interface {
@@ -17,30 +22,55 @@ type CloudkitRequestManager struct {
 }
 
 func (r *CloudkitRequestManager) PingRequest() (*http.Request, error) {
-
-	request, err := http.NewRequest("Get", "https://elbedev.com", nil)
-
 	keyId := r.KeyManager.KeyId()
-	request.Header.Add("X-Apple-CloudKit-Request-KeyID", keyId)
+	currentDate := r.formattedTime(time.Now())
+	path := r.subpath()
 
-	timeString := r.formattedTime(time.Now())
-	request.Header.Add("X-Apple-CloudKit-Request-ISO8601Date", timeString)
+	body := r.body()
+	hashedBody := r.hashedBody(body)
+	log.WithFields(log.Fields{
+		"body": string(hashedBody)}).Info("sha256")
 
-	signature := r.signatureForParameters(timeString, "", "")
-	request.Header.Add("X-Apple-CloudKit-Request-SignatureV1", signature)
+	encodedBody := base64.StdEncoding.EncodeToString([]byte(body))
+	log.WithFields(log.Fields{"encoded body":encodedBody}).Info("base64 of sha256")
 
-	publicKey := r.KeyManager.PublicKey()
-	fmt.Println(publicKey)
+	message := r.message(currentDate, hashedBody, path)
+	log.WithFields(log.Fields{
+		"date":currentDate,
+		"body":hashedBody,
+		"path": path}).Info("message")
 
-	privateKey := r.KeyManager.PrivateKey()
-	fmt.Println(privateKey)
+	signature := r.SignatureForMessage([]byte(message))
+	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
+	log.WithFields(log.Fields{"message":encodedSignature}).Info("base64 of signed sha256")
 
+	url := "https://api.apple-cloudkit.com" + path
+	log.WithFields(log.Fields{"url":url}).Info("path")
+
+	return r.request("GET", url, []byte(encodedBody), keyId, currentDate, encodedSignature)
+}
+
+func (cm *CloudkitRequestManager) request(method string, url string, body []byte, keyId string, date string, signature string) (request *http.Request, err error) {
+	request, err = http.NewRequest(method, url, bytes.NewBuffer(body))
+	request.Header.Set("X-Apple-CloudKit-Request-KeyID", keyId)
+	request.Header.Set("X-Apple-CloudKit-Request-ISO8601Date", date)
+	request.Header.Set("X-Apple-CloudKit-Request-SignatureV1", signature)
 	return request, err
 }
 
-func (r *CloudkitRequestManager) signatureForParameters(date string, body string, subpath string) string {
-	parameters := []string{date, body, subpath}
-	signature := strings.Join(parameters, ":")
+func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature []byte) {
+	priv := cm.KeyManager.PrivateKey()
+	rand := rand.Reader
+
+	h := sha256.New()
+	h.Write([]byte(message))
+
+	opts := crypto.SHA256
+	signature, err := priv.Sign(rand, h.Sum(nil), opts)
+	if err != nil {
+		log.Info("unable to sign", err)
+	}
+
 	return signature
 }
 
@@ -49,9 +79,11 @@ func (r *CloudkitRequestManager) signatureForParameters(date string, body string
 func (r *CloudkitRequestManager) subpath() string {
 	version := "1"
 	containerId := "iCloud.com.elbedev.shelve.dev"
-	subpath := "public/users/lookup/email"
+	// subpath := "public/records/query"
+	// subpath := "public/users/lookup/email"
+	subpath := "public/users/caller"
 
-	components := []string{"database", version, containerId, "development", subpath}
+	components := []string{"/database", version, containerId, "development", subpath}
 	return strings.Join(components, "/")
 }
 
@@ -62,13 +94,27 @@ func (r *CloudkitRequestManager) url() string {
 	return strings.Join([]string{path, subpath}, "/")
 }
 
-func (r *CloudkitRequestManager) formattedTime(time time.Time) string {
-	//2006-01-02T15:04:05MST-0700
-	// timeString := time.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
-	return time.Format("2006-01-02T15:04:05MST-0700")
+func (r *CloudkitRequestManager) formattedTime(t time.Time) string {
+	date := t.UTC().Format(time.RFC3339)
+	return date
 }
 
-func (r *CloudkitRequestManager) payload(date string, body string, service string) string {
-	components := []string{date, body, service}
-	return strings.Join(components, ":")
+// http://stackoverflow.com/questions/35247436/cloudkit-server-to-server-authentication
+func (r *CloudkitRequestManager) message(date string, payload string, path string) string {
+	components := []string{date, payload, path}
+	message := strings.Join(components, ":")
+	return message
+}
+
+func (r CloudkitRequestManager) hashedBody(body string) string {
+	h := sha256.New()
+	h.Write([]byte(body))
+	return base64.StdEncoding.EncodeToString([]byte(h.Sum(nil)))
+}
+
+func (r *CloudkitRequestManager) body() string {
+	// body := `{"users":[{"emailAddress":"some@one.com"}]}`
+	body := ``
+	// body := `{"zoneID": "_defaultZone","query": {"recordType": "Shelve"}}`
+	return body
 }

@@ -25,7 +25,9 @@ import (
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/q231950/sputnik/requesthandling"
 	"github.com/spf13/cobra"
+	"io/ioutil"
 	"log"
+	"net/http"
 )
 
 // pingCmd represents the ping command
@@ -40,13 +42,28 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		requestManager := requesthandling.CloudkitRequestManager{keyManager}
+		requestManager := requesthandling.CloudkitRequestManager{&keyManager}
 		request, err := requestManager.PingRequest()
 		if err == nil {
 			fmt.Println(request)
 		} else {
 			log.Fatal("Failed to create ping request")
 		}
+
+		// hah, err := ioutil.ReadAll(request.Body)
+		// fmt.Println(string(hah))
+
+		client := &http.Client{}
+    resp, err := client.Do(request)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    fmt.Println("response Status:", resp.Status)
+    fmt.Println("response Headers:", resp.Header)
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println("response Body:", string(body))
 	},
 }
 

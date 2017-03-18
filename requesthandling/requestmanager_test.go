@@ -2,6 +2,7 @@ package requesthandling
 
 import (
 	"github.com/q231950/sputnik/keymanager/mocks"
+	//	"github.com/q231950/sputnik/mocks"
 	"testing"
 	"time"
 )
@@ -45,3 +46,17 @@ func TestPayloadFormat(t *testing.T) {
 		t.Errorf("The request payload needs to be properly formatted")
 	}
 }
+
+/*
+func testSignatureForMessage(t *testing.T) {
+	keyManager := keymanager.MockKeyManager{}
+	r := CloudkitRequestManager{keyManager}
+
+	message := []byte("a message to be signed")
+	priv := new(mocks.MockPrivateKey)
+	signature := r.SignatureForMessage(message, priv)
+	if signature != "some" {
+		t.Errorf("Signature is not correct")
+	}
+}
+*/

@@ -36,7 +36,7 @@ var storeCmd = &cobra.Command{
 		if len(args) == 1 {
 			keyId := args[0]
 			keyManager := keymanager.New()
-			err := keyManager.StoreKeyId(keyId)
+			err := keyManager.StoreKeyID(keyId)
 			if err != nil {
 				log.Error(err)
 			} else {

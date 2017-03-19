@@ -26,7 +26,7 @@ type CloudkitRequestManager struct {
 
 // PingRequest is a sample request, only used for experimenting purposes
 func (cm *CloudkitRequestManager) PingRequest() (*http.Request, error) {
-	keyID := cm.KeyManager.KeyId()
+	keyID := cm.KeyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath()
 
@@ -58,12 +58,12 @@ func (cm *CloudkitRequestManager) PingRequest() (*http.Request, error) {
 //	- method POST/GET/...
 //	- body is used as body for POST requests.
 //	- url the request's endpoint
-//	- keyId Header parameter X-Apple-CloudKit-Request-KeyID
+//	- keyID Header parameter X-Apple-CloudKit-Request-KeyID
 //	- date Header parameter X-Apple-CloudKit-Request-ISO8601Date
 //	- signature Header parameter X-Apple-CloudKit-Request-SignatureV1
-func (cm *CloudkitRequestManager) request(method string, url string, body []byte, keyId string, date string, signature string) (request *http.Request, err error) {
+func (cm *CloudkitRequestManager) request(method string, url string, body []byte, keyID string, date string, signature string) (request *http.Request, err error) {
 	request, err = http.NewRequest(method, url, bytes.NewBuffer(body))
-	request.Header.Set("X-Apple-CloudKit-Request-KeyID", keyId)
+	request.Header.Set("X-Apple-CloudKit-Request-KeyID", keyID)
 	request.Header.Set("X-Apple-CloudKit-Request-ISO8601Date", date)
 	request.Header.Set("X-Apple-CloudKit-Request-SignatureV1", signature)
 	return request, err

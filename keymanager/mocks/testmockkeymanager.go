@@ -19,7 +19,7 @@ func (m MockKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	return key
 }
 
-func (m MockKeyManager) KeyId() string {
+func (m MockKeyManager) KeyID() string {
 	return "key id"
 }
 
@@ -27,6 +27,6 @@ func (m MockKeyManager) RemoveSigningIdentity() error {
 	return nil
 }
 
-func (m MockKeyManager) StoreKeyId(key string) error {
+func (m MockKeyManager) StoreKeyID(key string) error {
 	return nil
 }

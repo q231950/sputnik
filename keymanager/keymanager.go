@@ -26,9 +26,9 @@ const KeyIDEnvironmentVariableName = string("SPUTNIK_CLOUDKIT_KEYID")
 type KeyManager interface {
 	PublicKey() *ecdsa.PublicKey
 	PrivateKey() *ecdsa.PrivateKey
-	KeyId() string
+	KeyID() string
 	RemoveSigningIdentity() error
-	StoreKeyId(key string) error
+	StoreKeyID(key string) error
 }
 
 // CloudKitKeyManager is a concrete KeyManager
@@ -43,15 +43,15 @@ func New() CloudKitKeyManager {
 	return CloudKitKeyManager{pemFileName: "eckey.pem", derFileName: "cert.der", keyIDFileName: "keyid.txt"}
 }
 
-// KeyId looks up the CloudKit Key ID
-func (k CloudKitKeyManager) KeyId() string {
+// KeyID looks up the CloudKit Key ID
+func (k CloudKitKeyManager) KeyID() string {
 	keyID := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
 	if len(keyID) <= 0 {
-		// no KeyId found in environment variables
+		// no KeyID found in environment variables
 		keyID, err := k.storedKeyID()
 		if err != nil {
-			// no KeyId stored, none in env var, so it's missing
-			log.Warn("No Cloudkit KeyId specified. Please either provide one by `sputnik keyid store <your KeyID>`.")
+			// no KeyID stored, none in env var, so it's missing
+			log.Warn("No Cloudkit KeyID specified. Please either provide one by `sputnik keyid store <your KeyID>`.")
 			log.Fatal(err)
 		}
 		return keyID
@@ -59,8 +59,8 @@ func (k CloudKitKeyManager) KeyId() string {
 	return keyID
 }
 
-// StoreKeyId stores the givev ID to a file in Sputnik's secrets folder
-func (c CloudKitKeyManager) StoreKeyId(key string) error {
+// StoreKeyID stores the given ID to a file in Sputnik's secrets folder
+func (c CloudKitKeyManager) StoreKeyID(key string) error {
 	path := c.keyIdFilePath()
 	keyBytes := []byte(key)
 	return ioutil.WriteFile(path, keyBytes, 0644)

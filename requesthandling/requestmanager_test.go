@@ -1,10 +1,11 @@
 package requesthandling
 
 import (
-	"github.com/q231950/sputnik/keymanager/mocks"
-	//	"github.com/q231950/sputnik/mocks"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/q231950/sputnik/keymanager/mocks"
 )
 
 func TestPingRequest(t *testing.T) {
@@ -27,11 +28,14 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 	request, _ := requestManager.PingRequest()
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
-	expectedTime := time.Now()
+	expectedTime := time.Now().UTC()
 	roundedExpectedTime := expectedTime.Round(time.Minute)
 
-	actualTime, _ := time.Parse("2006-01-02T15:04:05MST-0700", dateString)
+	actualTime, _ := time.Parse(time.RFC3339, dateString)
 	roundedTime := actualTime.Round(time.Minute)
+
+	fmt.Println(actualTime)
+	fmt.Println(dateString)
 
 	if !roundedExpectedTime.Equal(roundedTime) {
 		t.Errorf("The date parameter must not differ by more than a minute from now")
@@ -41,8 +45,8 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 func TestPayloadFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	requestManager := CloudkitRequestManager{keyManager}
-	payload := requestManager.payload("date", "body", "service url")
-	if payload != "date:body:service url" {
+	message := requestManager.message("date", "body", "service url")
+	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
 	}
 }

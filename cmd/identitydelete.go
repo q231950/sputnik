@@ -51,7 +51,7 @@ func removeSigningIdentity(keyManager keymanager.KeyManager) {
 	if err != nil {
 		fmt.Println("An error occurred while removing the signing identity", err)
 	} else {
-		fmt.Println("Your signing identity has been removed. Make sure to revoke the corresponding KeyId in the Cloudkit Dashboard.")
+		fmt.Println("Your signing identity has been removed. Make sure to revoke the corresponding KeyID in the Cloudkit Dashboard.")
 		fmt.Println("The identity with the following public key was removed:")
 		fmt.Println(pub)
 	}

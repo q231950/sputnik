@@ -35,7 +35,7 @@ var keyidCmd = &cobra.Command{
 	#2 by setting an environment variable 'SPUTNIK_CLOUDKIT_KEYID'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		log.WithFields(log.Fields{"keyId":keyManager.KeyId()}).Info("`keyid`")
+		log.WithFields(log.Fields{"keyId":keyManager.KeyID()}).Info("`keyid`")
 	},
 }
 

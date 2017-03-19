@@ -48,13 +48,13 @@ func (k CloudKitKeyManager) KeyID() string {
 	keyID := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
 	if len(keyID) <= 0 {
 		// no KeyID found in environment variables
-		keyID, err := k.storedKeyID()
+		keyIDFromFile, err := k.storedKeyID()
 		if err != nil {
 			// no KeyID stored, none in env var, so it's missing
 			log.Warn("No Cloudkit KeyID specified. Please either provide one by `sputnik keyid store <your KeyID>`.")
 			log.Fatal(err)
 		}
-		return keyID
+		return keyIDFromFile
 	}
 	return keyID
 }

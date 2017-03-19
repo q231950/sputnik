@@ -36,6 +36,8 @@ You can remove the Sputnik signing identity by
 
 `./sputnik eckey remove`
 
+This will remove the signing identity local to your machine - it is up to you to revoke the key in the Cloudkit Dashboard.
+
 ### Ping Shelve
 
 This is one sample GET request to Cloudkit, using a specific container ID. If you want to make this request working for you, you need to change the container ID in `requestmanager.go` and recompile.

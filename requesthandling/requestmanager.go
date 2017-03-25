@@ -51,7 +51,7 @@ func (cm *CloudkitRequestManager) PingRequest() (*http.Request, error) {
 	url := "https://api.apple-cloudkit.com" + path
 	log.WithFields(log.Fields{"url": url}).Info("path")
 
-	return cm.request("GET", url, []byte(encodedBody), keyID, currentDate, encodedSignature)
+	return cm.request("POST", url, []byte(body), keyID, currentDate, encodedSignature)
 }
 
 // request creates a request with the given parameters.
@@ -91,8 +91,9 @@ func (r *CloudkitRequestManager) subpath() string {
 	version := "1"
 	containerID := "iCloud.com.elbedev.shelve.dev"
 	// subpath := "public/records/query"
+	subpath := "public/records/modify"
 	// subpath := "public/users/lookup/email"
-	subpath := "public/users/caller"
+	// subpath := "public/users/caller"
 
 	components := []string{"/database", version, containerID, "development", subpath}
 	return strings.Join(components, "/")
@@ -126,7 +127,21 @@ func (cm CloudkitRequestManager) hashedBody(body string) string {
 
 func (cm *CloudkitRequestManager) body() string {
 	// body := `{"users":[{"emailAddress":"some@one.com"}]}`
-	body := ``
-	// body := `{"zoneID": "_defaultZone","query": {"recordType": "Shelve"}}`
+	// body := ``
+	body := `{
+    "operations": [
+        {
+            "operationType": "create",
+            "record": {
+                "recordType": "Shelve",
+                "fields": {
+                    "title": {
+                        "value": "pure awesome 🎉"
+                    }
+                }
+            }
+        }
+    ]
+}`
 	return body
 }

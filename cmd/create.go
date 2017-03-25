@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +30,7 @@ import (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Creates a new server-to-server certificate",
+	Short: "Creates a new signing identity",
 	Long:  `For now, a file named eckey.pem will be put into the secrets folder.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		createECKey()
@@ -44,13 +45,13 @@ func createECKey() {
 	keyManager := keymanager.New()
 	exists := keyManager.SigningIdentityExists()
 	if exists {
-		fmt.Println("The ec key exists already, this is it:\n")
+		fmt.Println("The ec key exists already, this is it:")
 		_ = keyManager.ECKey()
 	} else {
-		fmt.Println("The ec key does not exist, need to create, one moment, please\n")
+		fmt.Println("The ec key does not exist, need to create, one moment, please")
 		keyManager.CreateSigningIdentity()
 
-		fmt.Println("Ok, here it is\n")
+		fmt.Println("Ok, here it is")
 		_ = keyManager.ECKey()
 	}
 }

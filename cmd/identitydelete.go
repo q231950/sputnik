@@ -23,8 +23,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/q231950/sputnik/keymanager"
+	"github.com/spf13/cobra"
 )
 
 // identitydeleteCmd represents the identitydelete command
@@ -34,7 +34,7 @@ var identitydeleteCmd = &cobra.Command{
 	Long: `
 	This command is destructive!
 
-	'remove' removes the current signing identity. This invalidates the keyId in the Cloudkit Dashboard. After running this command you will need to revoke your existing keyId from https://icloud.developer.apple.com/dashboard/ in order to add a new one.`,
+	'remove' removes the current signing identity. This makes the key ID in the Cloudkit Dashboard useless. After running this command you should also revoke the key ID from https://icloud.developer.apple.com/dashboard/.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
 		if keyManager.SigningIdentityExists() {

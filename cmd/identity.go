@@ -27,26 +27,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// eckeyCmd represents the eckey command
+// identityCmd represents the eckey command
 var eckeyCmd = &cobra.Command{
-	Use:   "eckey",
-	Short: "Read the ec key",
-	Long:  `The ec key is used for server to server communication between CloudKit and everyone else.`,
+	Use:   "identity",
+	Short: "Show the signing identity",
+	Long:  `Show the signing identity that is used for signing the CloudKit requests.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
 		keyExists := keyManager.SigningIdentityExists()
 		if keyExists {
 			_ = keyManager.ECKey()
 		} else {
-			fmt.Println("The ec key does not exist, need to create one... I'll do this for you...\n")
-			createErr := keyManager.CreateSigningIdentity()
-			if createErr != nil {
-				fmt.Println("Sorry, failed to create the ec key\n")
-			} else {
-				path := keyManager.SecretsFolder()
-				fmt.Println("Ok, this is your key. It's named eckey.pem and located under", path, "\n")
-				_ = keyManager.ECKey()
-			}
+			fmt.Println("A signing identity could not be found. You can create one by `./sputnik identity create`")
 		}
 	},
 }

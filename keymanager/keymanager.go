@@ -205,11 +205,20 @@ func (k *CloudKitKeyManager) RemoveSigningIdentity() error {
 	removePemCommand := exec.Command("rm", k.pemFilePath())
 	err := removePemCommand.Run()
 	if err != nil {
-		return err
+		log.Info("Unable to remove PEM", err)
 	}
 
 	removeDerCommand := exec.Command("rm", k.derFilePath())
 	err = removeDerCommand.Run()
+	if err != nil {
+		log.Info("Unable to remove DER", err)
+	}
+
+	removeKeyIDCommand := exec.Command("rm", k.keyIdFilePath())
+	err = removeKeyIDCommand.Run()
+	if err != nil {
+		log.Info("Unable to remove key ID", err)
+	}
 
 	return err
 }

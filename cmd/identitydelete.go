@@ -47,6 +47,7 @@ var identitydeleteCmd = &cobra.Command{
 
 func removeSigningIdentity(keyManager keymanager.KeyManager) {
 	pub := keyManager.PublicKey()
+	keyID := keyManager.KeyID()
 	err := keyManager.RemoveSigningIdentity()
 	if err != nil {
 		fmt.Println("An error occurred while removing the signing identity", err)
@@ -54,6 +55,8 @@ func removeSigningIdentity(keyManager keymanager.KeyManager) {
 		fmt.Println("Your signing identity has been removed. Make sure to revoke the corresponding KeyID in the Cloudkit Dashboard.")
 		fmt.Println("The identity with the following public key was removed:")
 		fmt.Println(pub)
+		fmt.Println("The following key ID is now useless (unless you kept a copy of the private key somewhere outside of Sputnik)")
+		fmt.Println(keyID)
 	}
 }
 

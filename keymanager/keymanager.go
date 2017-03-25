@@ -1,20 +1,17 @@
 package keymanager
 
 import (
-	"bytes"
 	"crypto/dsa"
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
 	"strings"
-	"sync"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -168,24 +165,11 @@ func (k *CloudKitKeyManager) ECKey() string {
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 
-	var output bytes.Buffer
-	var waitGroup sync.WaitGroup
-
-	stdout, _ := command.StdoutPipe()
-	writer := io.MultiWriter(os.Stdout, &output)
-
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
-		io.Copy(writer, stdout)
-	}()
-
-	err := command.Run()
+	bytes, err := command.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	waitGroup.Wait()
-	return output.String()
+	return string(bytes)
 }
 
 // CreateSigningIdentity creates a new signing identity

@@ -36,7 +36,8 @@ var eckeyCmd = &cobra.Command{
 		keyManager := keymanager.New()
 		keyExists := keyManager.SigningIdentityExists()
 		if keyExists {
-			_ = keyManager.ECKey()
+			identity := keyManager.ECKey()
+			fmt.Println(identity)
 		} else {
 			fmt.Println("A signing identity could not be found. You can create one by `./sputnik identity create`")
 		}

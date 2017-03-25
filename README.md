@@ -1,4 +1,4 @@
-# спутник
+# 🛰 спутник
 
 ## Talk to CloudKit. Server-to-server in Go.
 

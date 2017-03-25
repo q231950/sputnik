@@ -2,6 +2,8 @@
 
 ## Talk to CloudKit. Server-to-server in Go.
 
+[![CircleCI](https://circleci.com/bb/q231950/sputnik/tree/master.svg?style=svg)](https://circleci.com/bb/q231950/sputnik/tree/master)
+
 ### Create a signing identity
 
 Talking to CloudKit requires authentication. Luckily, there is a command to create the signing identity for you.

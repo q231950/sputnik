@@ -18,13 +18,13 @@ You may print out the key in a CloudKit understandable format. Copy the output a
 
 `./sputnik identity`
 
-### Store the Cloudkit Key ID
+### Store the CloudKit Key ID
 
-Once you added your public key to Cloudkit's server-to-server keys you will get a Key ID for your client. You can store this key by
+Once you added your public key to CloudKit's server-to-server keys you will get a Key ID for your client. You can store this key by either
 
 `./sputnik keyid store <your key id>`
 
-or by setting the environment variable
+or setting the environment variable
 
 `SPUTNIK_CLOUDKIT_KEYID`
 
@@ -34,11 +34,11 @@ You can remove the Sputnik signing identity by
 
 `./sputnik identity remove`
 
-This will remove the signing identity local to your machine (any certificate & stored key ID) - it is up to you to revoke the key in the Cloudkit Dashboard.
+This will remove the signing identity local to your machine (any certificate & stored key ID) - it is up to you to revoke the key in the CloudKit Dashboard.
 
 ### Ping Shelve
 
-This is one sample GET request to Cloudkit, using a specific container ID. If you want to make this request working for you, you need to change the container ID in `requestmanager.go` and recompile.
+This is one sample GET request to CloudKit, using a specific container ID. If you want to make this request working for you, you need to change the container ID in `requestmanager.go` and recompile.
 
 `./sputnik ping`
 

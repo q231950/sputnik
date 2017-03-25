@@ -16,16 +16,17 @@ import (
 
 // The RequestManager interface exposes methods for creating requests
 type RequestManager interface {
-	PingRequest() (*http.Request, error)
+	PostRequest() (*http.Request, error)
 }
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
 type CloudkitRequestManager struct {
 	KeyManager keymanager.KeyManager
+	Config     RequestConfig
 }
 
-// PingRequest is a sample request, only used for experimenting purposes
-func (cm *CloudkitRequestManager) PingRequest() (*http.Request, error) {
+// PostRequest is a sample request, only used for experimenting purposes
+func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 	keyID := cm.KeyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath()
@@ -69,6 +70,7 @@ func (cm *CloudkitRequestManager) request(method string, url string, body []byte
 	return request, err
 }
 
+// SignatureForMessage returns the signature for the given message
 func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature []byte) {
 	priv := cm.KeyManager.PrivateKey()
 	rand := rand.Reader
@@ -88,8 +90,8 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 // [path]/database/[version]/[container]/[environment]/[operation-specific subpath]
 // https://api.apple-cloudkit.com/database/1/[container ID]/development/public/users/lookup/email
 func (r *CloudkitRequestManager) subpath() string {
-	version := "1"
-	containerID := "iCloud.com.elbedev.shelve.dev"
+	version := r.Config.Version
+	containerID := r.Config.ContainerID
 	// subpath := "public/records/query"
 	subpath := "public/records/modify"
 	// subpath := "public/users/lookup/email"

@@ -22,23 +22,25 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/q231950/sputnik/keymanager"
-	"github.com/q231950/sputnik/requesthandling"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/q231950/sputnik/keymanager"
+	"github.com/q231950/sputnik/requesthandling"
+	"github.com/spf13/cobra"
 )
 
 // pingCmd represents the ping command
 var pingCmd = &cobra.Command{
-	Use:   "ping",
-	Short: "Send a request to cloudkit if at least something works",
-	Long: `Ping creates a GET request and sends it off`,
+	Use:   "post",
+	Short: "Send a post request to CloudKit",
+	Long:  `Ping creates a GET request and sends it off`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		requestManager := requesthandling.CloudkitRequestManager{&keyManager}
-		request, err := requestManager.PingRequest()
+		config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+		requestManager := requesthandling.CloudkitRequestManager{KeyManager: &keyManager, Config: config}
+		request, err := requestManager.PostRequest()
 		if err == nil {
 			fmt.Println(request)
 		} else {
@@ -46,16 +48,16 @@ var pingCmd = &cobra.Command{
 		}
 
 		client := &http.Client{}
-    resp, err := client.Do(request)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+		resp, err := client.Do(request)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
 
-    fmt.Println("response Status:", resp.Status)
-    fmt.Println("response Headers:", resp.Header)
-    body, _ := ioutil.ReadAll(resp.Body)
-    fmt.Println("response Body:", string(body))
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("response Body:", string(body))
 	},
 }
 

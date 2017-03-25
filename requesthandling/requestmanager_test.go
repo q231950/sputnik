@@ -7,24 +7,26 @@ import (
 	"github.com/q231950/sputnik/keymanager/mocks"
 )
 
-func TestPingRequest(t *testing.T) {
+func TestPostRequest(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
-	request, err := requestManager.PingRequest()
+	config := RequestConfig{Version: "1", ContainerID: "containerid"}
+	requestManager := CloudkitRequestManager{keyManager, config}
+	request, err := requestManager.PostRequest()
 
 	if request == nil {
-		t.Errorf("The Ping Request must not be nil")
+		t.Errorf("The Post Request must not be nil")
 	}
 
 	if err != nil {
-		t.Errorf("A Ping Request must not result in error")
+		t.Errorf("A Post Request must not result in error")
 	}
 }
 
-func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
+func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
-	request, _ := requestManager.PingRequest()
+	config := RequestConfig{Version: "1", ContainerID: "containerid"}
+	requestManager := CloudkitRequestManager{keyManager, config}
+	request, _ := requestManager.PostRequest()
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
 	expectedTime := time.Now().UTC()
@@ -40,7 +42,8 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 
 func TestPayloadFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
+	config := RequestConfig{Version: "1", ContainerID: "containerid"}
+	requestManager := CloudkitRequestManager{keyManager, config}
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")

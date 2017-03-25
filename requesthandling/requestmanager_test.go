@@ -1,7 +1,6 @@
 package requesthandling
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -33,9 +32,6 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 
 	actualTime, _ := time.Parse(time.RFC3339, dateString)
 	roundedTime := actualTime.Round(time.Minute)
-
-	fmt.Println(actualTime)
-	fmt.Println(dateString)
 
 	if !roundedExpectedTime.Equal(roundedTime) {
 		t.Errorf("The date parameter must not differ by more than a minute from now")

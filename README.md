@@ -1,6 +1,6 @@
 # 🛰 спутник
 
-## Talk to CloudKit. Server-to-server in Go.
+## Talk to  CloudKit. Server-to-server in Go.
 
 [![CircleCI](https://circleci.com/bb/q231950/sputnik/tree/master.svg?style=svg)](https://circleci.com/bb/q231950/sputnik/tree/master)
 
@@ -45,3 +45,6 @@ This is one sample GET request to CloudKit, using a specific container ID. If yo
 ## State
 
 > It's a 0.1
+
+
+![Gemeinfrei, <a href="https://commons.wikimedia.org/w/index.php?curid=229349">Link</a>](resources/331px-Sputnik-stamp-ussr.jpg)

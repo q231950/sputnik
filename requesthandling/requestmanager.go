@@ -3,6 +3,7 @@ package requesthandling
 import (
 	"bytes"
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -32,7 +33,7 @@ func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 	path := cm.subpath()
 
 	body := cm.body()
-	hashedBody := cm.hashedBody(body)
+	hashedBody := cm.HashedBody(body)
 	log.WithFields(log.Fields{
 		"body": string(hashedBody)}).Info("sha256")
 
@@ -45,7 +46,7 @@ func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 		"body": hashedBody,
 		"path": path}).Info("message")
 
-	signature := cm.SignatureForMessage([]byte(message))
+	signature := cm.SignatureForMessage([]byte(message), cm.KeyManager.PrivateKey())
 	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
 	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
 
@@ -71,8 +72,7 @@ func (cm *CloudkitRequestManager) request(method string, url string, body []byte
 }
 
 // SignatureForMessage returns the signature for the given message
-func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature []byte) {
-	priv := cm.KeyManager.PrivateKey()
+func (cm *CloudkitRequestManager) SignatureForMessage(message []byte, priv *ecdsa.PrivateKey) (signature []byte) {
 	rand := rand.Reader
 
 	h := sha256.New()
@@ -121,7 +121,7 @@ func (cm *CloudkitRequestManager) message(date string, payload string, path stri
 	return message
 }
 
-func (cm CloudkitRequestManager) hashedBody(body string) string {
+func (cm CloudkitRequestManager) HashedBody(body string) string {
 	h := sha256.New()
 	h.Write([]byte(body))
 	return base64.StdEncoding.EncodeToString([]byte(h.Sum(nil)))

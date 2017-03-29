@@ -4,6 +4,8 @@
 
 [![CircleCI](https://circleci.com/bb/q231950/sputnik/tree/master.svg?style=svg)](https://circleci.com/bb/q231950/sputnik/tree/master)
 
+> **Sputnik** enables you to connect to CloudKit from within your Golang package using the Server-to-server communication that CloudKit provides.
+
 ### Create a signing identity
 
 Talking to CloudKit requires authentication. Luckily, there is a command to create the signing identity for you.
@@ -36,7 +38,7 @@ You can remove the Sputnik signing identity by
 
 This will remove the signing identity local to your machine (any certificate & stored key ID) - it is up to you to revoke the key in the CloudKit Dashboard.
 
-### Ping Shelve
+### Usage
 
 This is one sample GET request to CloudKit, using a specific container ID. If you want to make this request working for you, you need to change the container ID in `requestmanager.go` and recompile.
 

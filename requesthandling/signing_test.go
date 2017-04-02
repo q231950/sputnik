@@ -52,6 +52,17 @@ func TestEmptyHashedBody(t *testing.T) {
 	}
 }
 
+func TestSignatureError(t *testing.T) {
+	keyManager := keymanager.MockKeyManager{}
+	config := NewRequestConfig("version", "containerID")
+	r := CloudkitRequestManager{keyManager, config}
+	signature := r.SignatureForMessage([]byte("message"), nil)
+
+	if signature != nil {
+		t.Errorf("Message should not be signed without a private key", signature)
+	}
+}
+
 // func TestSignature(t *testing.T) {
 //
 // 	keyManager := keymanager.MockKeyManager{}

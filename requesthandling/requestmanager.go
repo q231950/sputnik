@@ -15,9 +15,22 @@ import (
 	"github.com/q231950/sputnik/keymanager"
 )
 
+// The HTTPMethod defines the method of a request
+type HTTPMethod string
+
+const (
+	// GET reqpresents HTTP GET
+	GET HTTPMethod = "GET"
+	// POST reqpresents HTTP POST
+	POST = "POST"
+	// PUT reqpresents HTTP PUT
+	PUT = "PUT"
+)
+
 // The RequestManager interface exposes methods for creating requests
 type RequestManager interface {
 	PostRequest() (*http.Request, error)
+	Request(path string, method HTTPMethod, payload string) (*http.Request, error)
 }
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
@@ -26,11 +39,40 @@ type CloudkitRequestManager struct {
 	Config     RequestConfig
 }
 
+// Request creates a signed request with the given parameters
+func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payload string) (*http.Request, error) {
+	keyID := cm.KeyManager.KeyID()
+	currentDate := cm.formattedTime(time.Now())
+
+	hashedBody := cm.HashedBody(payload)
+	log.WithFields(log.Fields{
+		"body": string(hashedBody)}).Info("sha256")
+
+	encodedBody := base64.StdEncoding.EncodeToString([]byte(payload))
+	log.WithFields(log.Fields{"encoded body": encodedBody}).Info("base64 of sha256")
+
+	message := cm.message(currentDate, hashedBody, path)
+	log.WithFields(log.Fields{
+		"date": currentDate,
+		"body": hashedBody,
+		"path": path}).Info("message")
+
+	signature := cm.SignatureForMessage([]byte(message), cm.KeyManager.PrivateKey())
+	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
+	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
+
+	url := "https://api.apple-cloudkit.com" + path
+	log.WithFields(log.Fields{"url": url}).Info("path")
+
+	return cm.request(string(method), url, []byte(payload), keyID, currentDate, encodedSignature)
+
+}
+
 // PostRequest is a sample request, only used for experimenting purposes
 func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 	keyID := cm.KeyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
-	path := cm.subpath()
+	path := cm.fullSubpath("public/records/modify")
 
 	body := cm.body()
 	hashedBody := cm.HashedBody(body)
@@ -79,33 +121,34 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte, priv *ecds
 	h.Write([]byte(message))
 
 	opts := crypto.SHA256
-	signature, err := priv.Sign(rand, h.Sum(nil), opts)
-	if err != nil {
-		log.Error("unable to sign", err)
+	if priv != nil {
+		signature, err := priv.Sign(rand, h.Sum(nil), opts)
+		if err != nil {
+			log.Error("unable to sign", err)
+		}
+
+		return signature
 	}
 
-	return signature
+	log.Error("Can't sign without a private key")
+
+	return nil
 }
 
 // [path]/database/[version]/[container]/[environment]/[operation-specific subpath]
 // https://api.apple-cloudkit.com/database/1/[container ID]/development/public/users/lookup/email
-func (r *CloudkitRequestManager) subpath() string {
-	version := r.Config.Version
-	containerID := r.Config.ContainerID
-	// subpath := "public/records/query"
-	subpath := "public/records/modify"
-	// subpath := "public/users/lookup/email"
-	// subpath := "public/users/caller"
-
-	components := []string{"/database", version, containerID, "development", subpath}
+func (cm *CloudkitRequestManager) fullSubpath(path string) string {
+	version := cm.Config.Version
+	containerID := cm.Config.ContainerID
+	components := []string{"/database", version, containerID, "development", path}
 	return strings.Join(components, "/")
 }
 
 // https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloutKitWebServicesReference/SettingUpWebServices/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW4
-func (cm *CloudkitRequestManager) url() string {
-	path := "https://api.apple-cloudkit.com"
-	subpath := cm.subpath()
-	return strings.Join([]string{path, subpath}, "/")
+func (cm *CloudkitRequestManager) url(path string) string {
+	url := "https://api.apple-cloudkit.com"
+	subpath := cm.fullSubpath(path)
+	return strings.Join([]string{url, subpath}, "/")
 }
 
 // formattedTime returns the given time in a Cloudkit compatible formatted string
@@ -121,15 +164,14 @@ func (cm *CloudkitRequestManager) message(date string, payload string, path stri
 	return message
 }
 
-func (cm CloudkitRequestManager) HashedBody(body string) string {
+// HashedBody takes the given body, hashes it, using sha256 and returns the base64 encoded result
+func (cm *CloudkitRequestManager) HashedBody(body string) string {
 	h := sha256.New()
 	h.Write([]byte(body))
 	return base64.StdEncoding.EncodeToString([]byte(h.Sum(nil)))
 }
 
 func (cm *CloudkitRequestManager) body() string {
-	// body := `{"users":[{"emailAddress":"some@one.com"}]}`
-	// body := ``
 	body := `{
     "operations": [
         {
@@ -138,7 +180,7 @@ func (cm *CloudkitRequestManager) body() string {
                 "recordType": "Shelve",
                 "fields": {
                     "title": {
-                        "value": "pure awesome 🎉"
+                        "value": "pure panda 🐼"
                     }
                 }
             }

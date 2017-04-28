@@ -3,13 +3,30 @@ package requesthandling
 import (
 	"testing"
 	"time"
+	"strings"
 
 	"github.com/q231950/sputnik/keymanager/mocks"
 )
 
+func TestNewRequestManager(t *testing.T) {
+	keyManager := keymanager.MockKeyManager{}
+	requestManager := New(keyManager, "database", "subpath")
+	if requestManager.keyManager != keyManager {
+		t.Errorf("A Request Manager's key manager should be the same that was used at initialisation")
+	}
+
+	if requestManager.database != "database" {
+		t.Errorf("A Request Manager's database should not change after initialisation")
+	}
+
+	if requestManager.operationSubpath != "subpath" {
+		t.Errorf("A Request Manager's operation subpath should not change after initialisation")
+	}
+}
+
 func TestPingRequest(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
+	requestManager := CloudkitRequestManager{keyManager, "database", "subpath"}
 	request, err := requestManager.PingRequest()
 
 	if request == nil {
@@ -23,7 +40,7 @@ func TestPingRequest(t *testing.T) {
 
 func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
+	requestManager := CloudkitRequestManager{&keyManager, "database", "subpath"}
 	request, _ := requestManager.PingRequest()
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
@@ -40,10 +57,19 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 
 func TestPayloadFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager}
+	requestManager := CloudkitRequestManager{&keyManager, "database", "subpath"}
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
+	}
+}
+
+func TestUrl(t *testing.T) {
+	keyManager := keymanager.MockKeyManager{}
+	requestManager := CloudkitRequestManager{&keyManager, "public", "users/caller"}
+	url := requestManager.url()
+	if !strings.HasSuffix(url, "public/users/caller") {
+		t.Errorf("The url of the request manager is faulty")
 	}
 }
 

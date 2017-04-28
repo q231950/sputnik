@@ -37,7 +37,12 @@ var pingCmd = &cobra.Command{
 	Long: `Ping creates a GET request and sends it off`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		requestManager := requesthandling.CloudkitRequestManager{&keyManager}
+		// subpath := "records/query"
+		// subpath := "users/lookup/email"
+		// subpath := "users/caller"
+		subpath := "records/modify"
+		database := "public"
+		requestManager := requesthandling.New(&keyManager, database, subpath)
 		request, err := requestManager.PingRequest()
 		if err == nil {
 			fmt.Println(request)

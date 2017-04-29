@@ -12,7 +12,9 @@ func Hello() {
 	fmt.Println("This is спутник.")
 
 	keyManager := keymanager.New()
-	requestManager := requesthandling.CloudkitRequestManager{KeyManager: &keyManager}
+	subpath := "records/modify"
+	database := "public"
+	requestManager := requesthandling.New(&keyManager, database, subpath)
 	request, err := requestManager.PingRequest()
 
 	if err == nil {

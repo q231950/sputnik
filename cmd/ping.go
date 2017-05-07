@@ -39,7 +39,12 @@ var pingCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
 		config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-		requestManager := requesthandling.CloudkitRequestManager{KeyManager: &keyManager, Config: config}
+		// subpath := "records/query"
+		// subpath := "users/lookup/email"
+		// subpath := "users/caller"
+		subpath := "records/modify"
+		database := "public"
+		requestManager := requesthandling.New(config, &keyManager, database, subpath)
 		request, err := requestManager.PostRequest()
 		if err == nil {
 			fmt.Println(request)

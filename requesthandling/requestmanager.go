@@ -3,7 +3,6 @@ package requesthandling
 import (
 	"bytes"
 	"crypto"
-	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -35,13 +34,19 @@ type RequestManager interface {
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
 type CloudkitRequestManager struct {
-	KeyManager keymanager.KeyManager
 	Config     RequestConfig
+	keyManager keymanager.KeyManager
+	database string
+	operationSubpath string
+}
+
+func New(config RequestConfig, keyManager keymanager.KeyManager, database string, operationSubpath string) CloudkitRequestManager {
+	return CloudkitRequestManager{Config: config, keyManager: keyManager, database: database, operationSubpath: operationSubpath}
 }
 
 // Request creates a signed request with the given parameters
 func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payload string) (*http.Request, error) {
-	keyID := cm.KeyManager.KeyID()
+	keyID := cm.keyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
 
 	hashedBody := cm.HashedBody(payload)
@@ -57,7 +62,7 @@ func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payloa
 		"body": hashedBody,
 		"path": path}).Info("message")
 
-	signature := cm.SignatureForMessage([]byte(message), cm.KeyManager.PrivateKey())
+	signature := cm.SignatureForMessage([]byte(message))
 	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
 	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
 
@@ -70,9 +75,10 @@ func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payloa
 
 // PostRequest is a sample request, only used for experimenting purposes
 func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
-	keyID := cm.KeyManager.KeyID()
+	keyID := cm.keyManager.KeyID()
+
 	currentDate := cm.formattedTime(time.Now())
-	path := cm.fullSubpath("public/records/modify")
+	path := cm.subpath("records/modify")
 
 	body := cm.body()
 	hashedBody := cm.HashedBody(body)
@@ -88,7 +94,7 @@ func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 		"body": hashedBody,
 		"path": path}).Info("message")
 
-	signature := cm.SignatureForMessage([]byte(message), cm.KeyManager.PrivateKey())
+	signature := cm.SignatureForMessage([]byte(message))
 	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
 	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
 
@@ -114,7 +120,8 @@ func (cm *CloudkitRequestManager) request(method string, url string, body []byte
 }
 
 // SignatureForMessage returns the signature for the given message
-func (cm *CloudkitRequestManager) SignatureForMessage(message []byte, priv *ecdsa.PrivateKey) (signature []byte) {
+func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature []byte) {
+	priv := cm.keyManager.PrivateKey()
 	rand := rand.Reader
 
 	h := sha256.New()
@@ -135,29 +142,23 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte, priv *ecds
 	return nil
 }
 
-// [path]/database/[version]/[container]/[environment]/[operation-specific subpath]
-// https://api.apple-cloudkit.com/database/1/[container ID]/development/public/users/lookup/email
-func (cm *CloudkitRequestManager) fullSubpath(path string) string {
+func (cm *CloudkitRequestManager) subpath(path string	) string {
 	version := cm.Config.Version
 	containerID := cm.Config.ContainerID
-	components := []string{"/database", version, containerID, "development", path}
+	components := []string{"/database", version, containerID, "development", cm.database, path}
 	return strings.Join(components, "/")
 }
-
-// https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloutKitWebServicesReference/SettingUpWebServices/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW4
 func (cm *CloudkitRequestManager) url(path string) string {
 	url := "https://api.apple-cloudkit.com"
-	subpath := cm.fullSubpath(path)
+	subpath := cm.subpath(path)
 	return strings.Join([]string{url, subpath}, "/")
 }
 
-// formattedTime returns the given time in a Cloudkit compatible formatted string
 func (cm *CloudkitRequestManager) formattedTime(t time.Time) string {
 	date := t.UTC().Format(time.RFC3339)
 	return date
 }
 
-// http://stackoverflow.com/questions/35247436/cloudkit-server-to-server-authentication
 func (cm *CloudkitRequestManager) message(date string, payload string, path string) string {
 	components := []string{date, payload, path}
 	message := strings.Join(components, ":")

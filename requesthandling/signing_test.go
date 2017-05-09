@@ -15,7 +15,9 @@ type TestableRequestManager interface {
 func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	requestManager := CloudkitRequestManager{keyManager, config}
+	subpath := "users/caller"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
 	request, _ := requestManager.PostRequest()
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
@@ -30,10 +32,12 @@ func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 	}
 }
 
-func TestPayloadFormat(t *testing.T) {
+func TestMessageFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	requestManager := CloudkitRequestManager{keyManager, config}
+	subpath := "users/caller"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
@@ -43,7 +47,9 @@ func TestPayloadFormat(t *testing.T) {
 func TestEmptyHashedBody(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := NewRequestConfig("version", "containerID")
-	requestManager := TestableRequestManager(&CloudkitRequestManager{keyManager, config})
+	subpath := "users/caller"
+	database := "public"
+	requestManager := TestableRequestManager(&CloudkitRequestManager{config, &keyManager, database, subpath})
 	body := ""
 	hash := requestManager.HashedBody(body)
 
@@ -52,14 +58,16 @@ func TestEmptyHashedBody(t *testing.T) {
 	}
 }
 
-func TestSignatureError(t *testing.T) {
+func TestSignMessage(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := NewRequestConfig("version", "containerID")
-	r := CloudkitRequestManager{keyManager, config}
-	signature := r.SignatureForMessage([]byte("message"), nil)
+	subpath := "subpath"
+	database := "database"
+	r := New(config, &keyManager, database, subpath)
+	signature := r.SignatureForMessage([]byte("message"))
 
-	if signature != nil {
-		t.Errorf("Message should not be signed without a private key", signature)
+	if signature == nil {
+		t.Errorf("A message should be signed when a private key is available", signature)
 	}
 }
 

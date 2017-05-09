@@ -176,7 +176,7 @@ func (cm *CloudkitRequestManager) body() string {
                 "recordType": "Shelve",
                 "fields": {
                     "title": {
-                        "value": "pure panda 🐼"
+                        "value": "panda panda 🐼🐼"
                     }
                 }
             }

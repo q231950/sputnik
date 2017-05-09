@@ -148,11 +148,6 @@ func (cm *CloudkitRequestManager) subpath(path string	) string {
 	components := []string{"/database", version, containerID, "development", cm.database, path}
 	return strings.Join(components, "/")
 }
-func (cm *CloudkitRequestManager) url(path string) string {
-	url := "https://api.apple-cloudkit.com"
-	subpath := cm.subpath(path)
-	return strings.Join([]string{url, subpath}, "/")
-}
 
 func (cm *CloudkitRequestManager) formattedTime(t time.Time) string {
 	date := t.UTC().Format(time.RFC3339)

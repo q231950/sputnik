@@ -3,14 +3,32 @@ package requesthandling
 import (
 	"testing"
 	"time"
-	"strings"
-
 	"github.com/q231950/sputnik/keymanager/mocks"
 )
 
+func TestPostRequest(t *testing.T) {
+	keyManager := keymanager.MockKeyManager{}
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	subpath := "records/modify"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
+	request, err := requestManager.PostRequest()
+
+	if request == nil {
+		t.Errorf("The Post Request must not be nil")
+	}
+
+	if err != nil {
+		t.Errorf("A Post Request must not result in error")
+	}
+}
+
 func TestNewRequestManager(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := New(keyManager, "database", "subpath")
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	subpath := "sub/path"
+	database := "database"
+	requestManager := New(config, keyManager, database, subpath)
 	if requestManager.keyManager != keyManager {
 		t.Errorf("A Request Manager's key manager should be the same that was used at initialisation")
 	}
@@ -19,30 +37,39 @@ func TestNewRequestManager(t *testing.T) {
 		t.Errorf("A Request Manager's database should not change after initialisation")
 	}
 
-	if requestManager.operationSubpath != "subpath" {
+	if requestManager.operationSubpath != "sub/path" {
 		t.Errorf("A Request Manager's operation subpath should not change after initialisation")
 	}
 }
 
-func TestPingRequest(t *testing.T) {
+func TestPostRequest2(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{keyManager, "database", "subpath"}
-	request, err := requestManager.PingRequest()
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	subpath := "records/modify"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
+	request, err := requestManager.PostRequest()
 
 	if request == nil {
-		t.Errorf("The Ping Request must not be nil")
+		t.Errorf("The Post Request must not be nil")
 	}
 
 	if err != nil {
-		t.Errorf("A Ping Request must not result in error")
+		t.Errorf("A Post Request must not result in error")
 	}
 }
 
-func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
+func TestRequest(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{&keyManager, "database", "subpath"}
-	request, _ := requestManager.PingRequest()
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	subpath := "records/modify"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
+	request, _ := requestManager.Request("/some/subpath", GET, `{"key":"value", "keys":["value1", "value2"]}`)
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
+	if request == nil {
+		t.Errorf("The Request must not be nil")
+	}
 
 	expectedTime := time.Now().UTC()
 	roundedExpectedTime := expectedTime.Round(time.Minute)
@@ -57,32 +84,12 @@ func TestPingRequestDateParameterIsInPerimeter(t *testing.T) {
 
 func TestPayloadFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{&keyManager, "database", "subpath"}
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	subpath := "records/modify"
+	database := "public"
+	requestManager := New(config, &keyManager, database, subpath)
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
 	}
 }
-
-func TestUrl(t *testing.T) {
-	keyManager := keymanager.MockKeyManager{}
-	requestManager := CloudkitRequestManager{&keyManager, "public", "users/caller"}
-	url := requestManager.url()
-	if !strings.HasSuffix(url, "public/users/caller") {
-		t.Errorf("The url of the request manager is faulty")
-	}
-}
-
-/*
-func testSignatureForMessage(t *testing.T) {
-	keyManager := keymanager.MockKeyManager{}
-	r := CloudkitRequestManager{keyManager}
-
-	message := []byte("a message to be signed")
-	priv := new(mocks.MockPrivateKey)
-	signature := r.SignatureForMessage(message, priv)
-	if signature != "some" {
-		t.Errorf("Signature is not correct")
-	}
-}
-*/

@@ -3,6 +3,7 @@ package requesthandling
 import (
 	"testing"
 	"time"
+
 	"github.com/q231950/sputnik/keymanager/mocks"
 )
 
@@ -65,7 +66,7 @@ func TestRequest(t *testing.T) {
 	subpath := "records/modify"
 	database := "public"
 	requestManager := New(config, &keyManager, database, subpath)
-	request, _ := requestManager.Request("/some/subpath", GET, `{"key":"value", "keys":["value1", "value2"]}`)
+	request, _ := requestManager.Request("/some/subpath", "GET", `{"key":"value", "keys":["value1", "value2"]}`)
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 	if request == nil {
 		t.Errorf("The Request must not be nil")

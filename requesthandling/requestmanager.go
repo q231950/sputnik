@@ -14,22 +14,10 @@ import (
 	"github.com/q231950/sputnik/keymanager"
 )
 
-// The HTTPMethod defines the method of a request
-type HTTPMethod string
-
-const (
-	// GET represents HTTP GET
-	GET HTTPMethod = "GET"
-	// POST represents HTTP POST
-	POST = "POST"
-	// PUT represents HTTP PUT
-	PUT = "PUT"
-)
-
 // The RequestManager interface exposes methods for creating requests
 type RequestManager interface {
 	PostRequest() (*http.Request, error)
-	Request(path string, method HTTPMethod, payload string) (*http.Request, error)
+	Request(path string, method string, payload string) (*http.Request, error)
 }
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
@@ -45,10 +33,10 @@ func New(config RequestConfig, keyManager keymanager.KeyManager, database string
 }
 
 // Request creates a signed request with the given parameters
-func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payload string) (*http.Request, error) {
+func (cm *CloudkitRequestManager) Request(p string, method string, payload string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
-
+	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)
 	log.WithFields(log.Fields{
 		"body": string(hashedBody)}).Info("sha256")
@@ -76,7 +64,6 @@ func (cm *CloudkitRequestManager) Request(path string, method HTTPMethod, payloa
 // PostRequest is a sample request, only used for experimenting purposes
 func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
-
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath("records/modify")
 

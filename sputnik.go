@@ -1,4 +1,4 @@
-package sputnik
+package main
 
 import (
 	"fmt"

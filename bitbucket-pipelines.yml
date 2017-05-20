@@ -10,5 +10,5 @@ pipelines:
           - cd "${PACKAGE_PATH}"
           - go get -v github.com/spf13/cobra/cobra
           - go get -v
-          - go build -v
+          - go build -o cli -v
           - go test ./... -v

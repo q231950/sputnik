@@ -18,11 +18,11 @@ import (
 type HTTPMethod string
 
 const (
-	// GET reqpresents HTTP GET
+	// GET represents HTTP GET
 	GET HTTPMethod = "GET"
-	// POST reqpresents HTTP POST
+	// POST represents HTTP POST
 	POST = "POST"
-	// PUT reqpresents HTTP PUT
+	// PUT represents HTTP PUT
 	PUT = "PUT"
 )
 

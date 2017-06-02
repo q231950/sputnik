@@ -1,13 +1,9 @@
-image: golang:1.7
+image: golang:1.8
 
 pipelines:
   default:
     - step:
-        script: # Modify the commands below to build your repository.
-          - PACKAGE_PATH="${GOPATH}/src/bitbucket.org/${BITBUCKET_REPO_OWNER}/${BITBUCKET_REPO_SLUG}"
-          - mkdir -pv "${PACKAGE_PATH}"
-          - tar -cO --exclude-vcs --exclude=bitbucket-pipelines.yml . | tar -xv -C "${PACKAGE_PATH}"
-          - cd "${PACKAGE_PATH}"
+        script:
           - go get -v github.com/spf13/cobra/cobra
           - go get -v
           - go build -o cli -v

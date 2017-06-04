@@ -3,4 +3,6 @@ dependencies:
     - go get -u -v
 test:
   override:
-    - go test -v ./...
+    - go get -v
+    - go build -v
+    - go test ./...

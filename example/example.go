@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/q231950/sputnik/sputnik"
+	"github.com/q231950/sputnik/sputnikapi"
 )
 
 func main() {

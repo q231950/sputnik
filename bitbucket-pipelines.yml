@@ -7,4 +7,5 @@ pipelines:
           - go get -v github.com/spf13/cobra/cobra
           - go get -v github.com/Sirupsen/logrus
           - go get -v ./...
+          - go build -v
           - go test ./... -v

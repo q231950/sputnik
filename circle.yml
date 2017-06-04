@@ -1,8 +1,7 @@
 dependencies:
   override:
-    - go get -u -v
+    - go get -v
 test:
   override:
-    - go get -v
     - go build -v
     - go test ./...

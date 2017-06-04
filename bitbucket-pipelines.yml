@@ -6,4 +6,5 @@ pipelines:
         script:
           - go get -v github.com/spf13/cobra/cobra
           - go get -v github.com/Sirupsen/logrus
+          - go get -v ./...
           - go test ./... -v

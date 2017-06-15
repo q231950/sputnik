@@ -22,9 +22,9 @@ type RequestManager interface {
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
 type CloudkitRequestManager struct {
-	Config     RequestConfig
-	keyManager keymanager.KeyManager
-	database string
+	Config           RequestConfig
+	keyManager       keymanager.KeyManager
+	database         string
 	operationSubpath string
 }
 
@@ -129,7 +129,7 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 	return nil
 }
 
-func (cm *CloudkitRequestManager) subpath(path string	) string {
+func (cm *CloudkitRequestManager) subpath(path string) string {
 	version := cm.Config.Version
 	containerID := cm.Config.ContainerID
 	components := []string{"/database", version, containerID, "development", cm.database, path}

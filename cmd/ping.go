@@ -31,6 +31,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var containerID string
+
 // pingCmd represents the ping command
 var pingCmd = &cobra.Command{
 	Use:   "post",
@@ -38,7 +40,7 @@ var pingCmd = &cobra.Command{
 	Long:  `Ping creates a GET request and sends it off`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+		config := requesthandling.RequestConfig{Version: "1", ContainerID: containerID}
 		subpath := "records/modify"
 		database := "public"
 		requestManager := requesthandling.New(config, &keyManager, database)
@@ -80,4 +82,5 @@ var pingCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(pingCmd)
+	pingCmd.Flags().StringVarP(&containerID, "container", "c", "iCloud.com.elbedev.shelve.dev", "The iCloud container to talk to.")
 }

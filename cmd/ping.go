@@ -34,18 +34,30 @@ import (
 // pingCmd represents the ping command
 var pingCmd = &cobra.Command{
 	Use:   "post",
-	Short: "Send a post request to CloudKit",
+	Short: "Send a test post request to CloudKit",
 	Long:  `Ping creates a GET request and sends it off`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
 		config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-		// subpath := "records/query"
-		// subpath := "users/lookup/email"
-		// subpath := "users/caller"
 		subpath := "records/modify"
 		database := "public"
-		requestManager := requesthandling.New(config, &keyManager, database, subpath)
-		request, err := requestManager.PostRequest()
+		requestManager := requesthandling.New(config, &keyManager, database)
+		body := `{
+	    "operations": [
+	        {
+	            "operationType": "create",
+	            "record": {
+	                "recordType": "Shelve",
+	                "fields": {
+	                    "title": {
+	                        "value": "panda panda 🐼🐼"
+	                    }
+	                }
+	            }
+	        }
+	    ]
+	}`
+		request, err := requestManager.PostRequest(subpath, body)
 		if err == nil {
 			fmt.Println(request)
 		} else {
@@ -61,8 +73,8 @@ var pingCmd = &cobra.Command{
 
 		fmt.Println("response Status:", resp.Status)
 		fmt.Println("response Headers:", resp.Header)
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("response Body:", string(body))
+		responseBody, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("response Body:", string(responseBody))
 	},
 }
 

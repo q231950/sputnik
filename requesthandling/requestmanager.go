@@ -16,20 +16,20 @@ import (
 
 // The RequestManager interface exposes methods for creating requests
 type RequestManager interface {
-	PostRequest() (*http.Request, error)
+	PostRequest(string, string) (*http.Request, error)
 	Request(path string, method string, payload string) (*http.Request, error)
 }
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
 type CloudkitRequestManager struct {
-	Config           RequestConfig
-	keyManager       keymanager.KeyManager
-	database         string
-	operationSubpath string
+	Config     RequestConfig
+	keyManager keymanager.KeyManager
+	database   string
 }
 
-func New(config RequestConfig, keyManager keymanager.KeyManager, database string, operationSubpath string) CloudkitRequestManager {
-	return CloudkitRequestManager{Config: config, keyManager: keyManager, database: database, operationSubpath: operationSubpath}
+// New creates a new RequestManager
+func New(config RequestConfig, keyManager keymanager.KeyManager, database string) CloudkitRequestManager {
+	return CloudkitRequestManager{Config: config, keyManager: keyManager, database: database}
 }
 
 // Request creates a signed request with the given parameters
@@ -62,12 +62,10 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 }
 
 // PostRequest is a sample request, only used for experimenting purposes
-func (cm *CloudkitRequestManager) PostRequest() (*http.Request, error) {
+func (cm *CloudkitRequestManager) PostRequest(operationPath string, body string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
-	path := cm.subpath("records/modify")
-
-	body := cm.body()
+	path := cm.subpath(operationPath)
 	hashedBody := cm.HashedBody(body)
 	log.WithFields(log.Fields{
 		"body": string(hashedBody)}).Info("sha256")
@@ -152,23 +150,4 @@ func (cm *CloudkitRequestManager) HashedBody(body string) string {
 	h := sha256.New()
 	h.Write([]byte(body))
 	return base64.StdEncoding.EncodeToString([]byte(h.Sum(nil)))
-}
-
-func (cm *CloudkitRequestManager) body() string {
-	body := `{
-    "operations": [
-        {
-            "operationType": "create",
-            "record": {
-                "recordType": "Shelve",
-                "fields": {
-                    "title": {
-                        "value": "panda panda 🐼🐼"
-                    }
-                }
-            }
-        }
-    ]
-}`
-	return body
 }

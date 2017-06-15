@@ -21,9 +21,9 @@
 package cmd
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
-	log "github.com/Sirupsen/logrus"
 )
 
 // keyidCmd represents the keyid command
@@ -35,7 +35,7 @@ var keyidCmd = &cobra.Command{
 	#2 by setting an environment variable 'SPUTNIK_CLOUDKIT_KEYID'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		keyManager := keymanager.New()
-		log.WithFields(log.Fields{"keyId":keyManager.KeyID()}).Info("`keyid`")
+		log.WithFields(log.Fields{"keyId": keyManager.KeyID()}).Info("`keyid`")
 	},
 }
 

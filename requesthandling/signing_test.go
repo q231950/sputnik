@@ -15,10 +15,9 @@ type TestableRequestManager interface {
 func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	subpath := "users/caller"
 	database := "public"
-	requestManager := New(config, &keyManager, database, subpath)
-	request, _ := requestManager.PostRequest()
+	requestManager := New(config, &keyManager, database)
+	request, _ := requestManager.PostRequest("users/caller", ``)
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
 	expectedTime := time.Now().UTC()
@@ -35,9 +34,8 @@ func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 func TestMessageFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	subpath := "users/caller"
 	database := "public"
-	requestManager := New(config, &keyManager, database, subpath)
+	requestManager := New(config, &keyManager, database)
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
@@ -47,9 +45,8 @@ func TestMessageFormat(t *testing.T) {
 func TestEmptyHashedBody(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := NewRequestConfig("version", "containerID")
-	subpath := "users/caller"
 	database := "public"
-	requestManager := TestableRequestManager(&CloudkitRequestManager{config, &keyManager, database, subpath})
+	requestManager := TestableRequestManager(&CloudkitRequestManager{config, &keyManager, database})
 	body := ""
 	hash := requestManager.HashedBody(body)
 
@@ -61,13 +58,12 @@ func TestEmptyHashedBody(t *testing.T) {
 func TestSignMessage(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
 	config := NewRequestConfig("version", "containerID")
-	subpath := "subpath"
 	database := "database"
-	r := New(config, &keyManager, database, subpath)
+	r := New(config, &keyManager, database)
 	signature := r.SignatureForMessage([]byte("message"))
 
 	if signature == nil {
-		t.Errorf("A message should be signed when a private key is available", signature)
+		t.Errorf("A message should be signed when a private key is available")
 	}
 }
 

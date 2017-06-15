@@ -21,9 +21,9 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/q231950/sputnik/keymanager"
 	log "github.com/Sirupsen/logrus"
+	"github.com/q231950/sputnik/keymanager"
+	"github.com/spf13/cobra"
 )
 
 // storeCmd represents the store command
@@ -34,13 +34,13 @@ var storeCmd = &cobra.Command{
 	Use this command to store the key ID in Sputnik's secrets folder in ~/.sputnik/secrets/`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
-			keyId := args[0]
+			keyID := args[0]
 			keyManager := keymanager.New()
-			err := keyManager.StoreKeyID(keyId)
+			err := keyManager.StoreKeyID(keyID)
 			if err != nil {
 				log.Error(err)
 			} else {
-				log.WithFields(log.Fields{"keyid":keyId}).Info("stored")
+				log.WithFields(log.Fields{"keyid": keyID}).Info("stored")
 			}
 		} else {
 			log.Error("`keyid store` requires one argument which is the keyId to store.")

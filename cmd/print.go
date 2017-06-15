@@ -41,14 +41,14 @@ to quickly create a Cobra application.`,
 		keyManager := keymanager.New()
 		exists := keyManager.SigningIdentityExists()
 		if exists {
-			fmt.Println("Printing the public/private keys:\n")
+			fmt.Println("Printing the public/private keys:")
 			_ = keyManager.PrivatePublicKeyWriter()
 			// fmt.Println(reader.String())
 		} else {
-			fmt.Println("The ec key does not exist, need to create, one moment, please\n")
+			fmt.Println("The ec key does not exist, need to create, one moment, please")
 			keyManager.CreateSigningIdentity()
 
-			fmt.Println("Ok done. Printing it\n")
+			fmt.Println("Ok done. Printing it")
 			_ = keyManager.PrivatePublicKeyWriter()
 		}
 	},

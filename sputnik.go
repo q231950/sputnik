@@ -21,17 +21,17 @@ const (
 )
 
 // Post the payload to the path
-func Post(path string, payload string) (*http.Response, error) {
-	return request(path, POST, payload)
+func Post(path string, payload string, containerID string) (*http.Response, error) {
+	return request(path, POST, payload, containerID)
 }
 
 // Request constructs a signed CloudKit request
-func request(path string, method HTTPMethod, payload string) (*http.Response, error) {
+func request(path string, method HTTPMethod, payload string, containerID string) (*http.Response, error) {
 
 	keyManager := keymanager.New()
-	config := requests.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
+	config := requests.RequestConfig{Version: "1", ContainerID: containerID}
 	database := "public"
-	requestManager := requests.New(config, &keyManager, database, path)
+	requestManager := requests.New(config, &keyManager, database)
 
 	request, err := requestManager.Request(path, string(method), payload)
 	if err != nil {

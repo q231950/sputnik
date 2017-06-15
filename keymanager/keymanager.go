@@ -41,11 +41,11 @@ func New() CloudKitKeyManager {
 }
 
 // KeyID looks up the CloudKit Key ID
-func (k CloudKitKeyManager) KeyID() string {
+func (c CloudKitKeyManager) KeyID() string {
 	keyID := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
 	if len(keyID) <= 0 {
 		// no KeyID found in environment variables
-		keyIDFromFile, err := k.storedKeyID()
+		keyIDFromFile, err := c.storedKeyID()
 		if err != nil {
 			// no KeyID stored, none in env var, so it's missing
 			log.Warn("No Cloudkit KeyID specified. Please either provide one by `sputnik keyid store <your KeyID>`.")
@@ -58,14 +58,14 @@ func (k CloudKitKeyManager) KeyID() string {
 
 // StoreKeyID stores the given ID to a file in Sputnik's secrets folder
 func (c CloudKitKeyManager) StoreKeyID(key string) error {
-	path := c.keyIdFilePath()
+	path := c.keyIDFilePath()
 	keyBytes := []byte(key)
 	return ioutil.WriteFile(path, keyBytes, 0644)
 }
 
 // storedKeyID looks up the Key ID in a file
 func (c CloudKitKeyManager) storedKeyID() (string, error) {
-	path := c.keyIdFilePath()
+	path := c.keyIDFilePath()
 	keyBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -73,9 +73,9 @@ func (c CloudKitKeyManager) storedKeyID() (string, error) {
 	return string(keyBytes), nil
 }
 
-// PrivateKey returns the private key that was generated when creating the signing identity
-func (k CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
-	path := k.derFilePath()
+// PrivateKey returns the x509 private key that was generated when creating the signing identity
+func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
+	path := c.derFilePath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal("No der file found. create one by `sputnik eckey create`")
@@ -90,8 +90,8 @@ func (k CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 }
 
 // PublicKey returns the public key that was generated when creating the signing identity
-func (k CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
-	pemString := k.PrivatePublicKeyWriter()
+func (c CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
+	pemString := c.PrivatePublicKeyWriter()
 	pemData := []byte(pemString)
 	block, _ := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
@@ -118,8 +118,8 @@ func (k CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 }
 
 // PrivatePublicKeyWriter should be named differently. It reads and returns the PEM encoded signing identity
-func (k *CloudKitKeyManager) PrivatePublicKeyWriter() string {
-	ecKeyPath := k.pemFilePath()
+func (c *CloudKitKeyManager) PrivatePublicKeyWriter() string {
+	ecKeyPath := c.pemFilePath()
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 	bytes, err := command.Output()
@@ -130,8 +130,8 @@ func (k *CloudKitKeyManager) PrivatePublicKeyWriter() string {
 }
 
 // SigningIdentityExists checks if a signing identity has been created
-func (k *CloudKitKeyManager) SigningIdentityExists() bool {
-	ecKeyPath := k.pemFilePath()
+func (c *CloudKitKeyManager) SigningIdentityExists() bool {
+	ecKeyPath := c.pemFilePath()
 
 	file, openError := os.Open(ecKeyPath)
 	if openError != nil {
@@ -142,26 +142,26 @@ func (k *CloudKitKeyManager) SigningIdentityExists() bool {
 }
 
 // keyIdFilePath represents the path to the Key ID file
-func (k *CloudKitKeyManager) keyIdFilePath() string {
-	secretsFolder := k.SecretsFolder()
-	return secretsFolder + "/" + k.keyIDFileName
+func (c *CloudKitKeyManager) keyIDFilePath() string {
+	secretsFolder := c.SecretsFolder()
+	return secretsFolder + "/" + c.keyIDFileName
 }
 
 // derFilePath represents the path to the DER encoded certificate
-func (k *CloudKitKeyManager) derFilePath() string {
-	secretsFolder := k.SecretsFolder()
-	return secretsFolder + "/" + k.derFileName
+func (c *CloudKitKeyManager) derFilePath() string {
+	secretsFolder := c.SecretsFolder()
+	return secretsFolder + "/" + c.derFileName
 }
 
 // pemFilePath represents the path to the PEM encoded certificate
-func (k *CloudKitKeyManager) pemFilePath() string {
-	secretsFolder := k.SecretsFolder()
-	return secretsFolder + "/" + k.pemFileName
+func (c *CloudKitKeyManager) pemFilePath() string {
+	secretsFolder := c.SecretsFolder()
+	return secretsFolder + "/" + c.pemFileName
 }
 
 // ECKey should be named differently. It returns the public part of the PEM encoded signing identity
-func (k *CloudKitKeyManager) ECKey() string {
-	ecKeyPath := k.pemFilePath()
+func (c *CloudKitKeyManager) ECKey() string {
+	ecKeyPath := c.pemFilePath()
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 
@@ -173,32 +173,32 @@ func (k *CloudKitKeyManager) ECKey() string {
 }
 
 // CreateSigningIdentity creates a new signing identity
-func (k *CloudKitKeyManager) CreateSigningIdentity() error {
-	err := k.createPemEncodedCertificate()
+func (c *CloudKitKeyManager) CreateSigningIdentity() error {
+	err := c.createPemEncodedCertificate()
 	if err != nil {
 		return err
 	}
 
-	err = k.createDerEncodedCertificate()
+	err = c.createDerEncodedCertificate()
 
 	return err
 }
 
 // RemoveSigningIdentity removes the existing signing identity
-func (k *CloudKitKeyManager) RemoveSigningIdentity() error {
-	removePemCommand := exec.Command("rm", k.pemFilePath())
+func (c *CloudKitKeyManager) RemoveSigningIdentity() error {
+	removePemCommand := exec.Command("rm", c.pemFilePath())
 	err := removePemCommand.Run()
 	if err != nil {
 		log.Info("Unable to remove PEM", err)
 	}
 
-	removeDerCommand := exec.Command("rm", k.derFilePath())
+	removeDerCommand := exec.Command("rm", c.derFilePath())
 	err = removeDerCommand.Run()
 	if err != nil {
 		log.Info("Unable to remove DER", err)
 	}
 
-	removeKeyIDCommand := exec.Command("rm", k.keyIdFilePath())
+	removeKeyIDCommand := exec.Command("rm", c.keyIDFilePath())
 	err = removeKeyIDCommand.Run()
 	if err != nil {
 		log.Info("Unable to remove key ID", err)
@@ -208,9 +208,9 @@ func (k *CloudKitKeyManager) RemoveSigningIdentity() error {
 }
 
 // createPemEncodedCertificate creates the PEM encoded certificate and stores it
-func (k *CloudKitKeyManager) createPemEncodedCertificate() error {
+func (c *CloudKitKeyManager) createPemEncodedCertificate() error {
 	fmt.Println("Creating PEM...")
-	pemFilePath := k.pemFilePath()
+	pemFilePath := c.pemFilePath()
 
 	command := exec.Command("openssl", "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", pemFilePath)
 	err := command.Start()
@@ -229,10 +229,10 @@ func (k *CloudKitKeyManager) createPemEncodedCertificate() error {
 }
 
 // createDerEncodedCertificate converts the PEM encoded signing identity to DER and stores it
-func (k *CloudKitKeyManager) createDerEncodedCertificate() error {
-	fmt.Println("Creating DER...", k.pemFileName, k.derFileName, k.SecretsFolder())
-	inPathPem := k.SecretsFolder() + "/" + k.pemFileName
-	outPathDer := k.SecretsFolder() + "/" + k.derFileName
+func (c *CloudKitKeyManager) createDerEncodedCertificate() error {
+	fmt.Println("Creating DER...", c.pemFileName, c.derFileName, c.SecretsFolder())
+	inPathPem := c.SecretsFolder() + "/" + c.pemFileName
+	outPathDer := c.SecretsFolder() + "/" + c.derFileName
 	command := exec.Command("openssl", "ec", "-outform", "der", "-in", inPathPem, "-out", outPathDer)
 
 	err := command.Run()
@@ -244,7 +244,7 @@ func (k *CloudKitKeyManager) createDerEncodedCertificate() error {
 }
 
 // SecretsFolder returns the path to Sputnik's secrets folder
-func (k *CloudKitKeyManager) SecretsFolder() string {
+func (c *CloudKitKeyManager) SecretsFolder() string {
 	homeDir := homeDir()
 
 	components := []string{homeDir, ".sputnik", "secrets"}

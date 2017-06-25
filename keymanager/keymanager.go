@@ -84,7 +84,7 @@ func (c CloudKitKeyManager) storedKeyID() (string, error) {
 // PrivateKey returns the x509 private key that was generated when creating the signing identity
 func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	if c.inMemoryPrivateKey != nil {
-		log.Info("Returning in memory private key")
+		log.WithFields(log.Fields{}).Info("Returning in memory private key")
 		return c.inMemoryPrivateKey
 	}
 	path := c.derFilePath()

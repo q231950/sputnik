@@ -33,6 +33,9 @@ type CloudKitKeyManager struct {
 	pemFileName   string
 	derFileName   string
 	keyIDFileName string
+	inMemoryKeyID string
+	inMemoryPrivateKey    *ecdsa.PrivateKey
+	inMemoryPublicKey    *ecdsa.PublicKey
 }
 
 // New returns a CloudKitKeyManager
@@ -65,16 +68,25 @@ func (c CloudKitKeyManager) StoreKeyID(key string) error {
 
 // storedKeyID looks up the Key ID in a file
 func (c CloudKitKeyManager) storedKeyID() (string, error) {
+	if len(c.inMemoryKeyID) > 0 {
+		log.Info("Returning in-memory KeyID")
+		return c.inMemoryKeyID, nil
+	}
 	path := c.keyIDFilePath()
 	keyBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
-	return string(keyBytes), nil
+	c.inMemoryKeyID = string(keyBytes)
+	return c.inMemoryKeyID, nil
 }
 
 // PrivateKey returns the x509 private key that was generated when creating the signing identity
 func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
+	if c.inMemoryPrivateKey != nil {
+		log.Info("Returning in memory private key")
+		return c.inMemoryPrivateKey
+	}
 	path := c.derFilePath()
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -86,11 +98,16 @@ func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 		log.Fatal("Failed to parse private ec key from pem: ", err)
 	}
 
-	return privateKey
+	c.inMemoryPrivateKey = privateKey
+	return c.inMemoryPrivateKey
 }
 
 // PublicKey returns the public key that was generated when creating the signing identity
 func (c CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
+	if c.inMemoryPublicKey != nil {
+		return c.inMemoryPublicKey
+	}
+
 	pemString := c.PrivatePublicKeyWriter()
 	pemData := []byte(pemString)
 	block, _ := pem.Decode(pemData)
@@ -109,6 +126,7 @@ func (c CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	case *dsa.PublicKey:
 		fmt.Println("pub is of type DSA:", pub)
 	case *ecdsa.PublicKey:
+		c.inMemoryPublicKey = pub
 		return pub
 	default:
 		panic("unknown type of public key")
@@ -137,6 +155,8 @@ func (c *CloudKitKeyManager) SigningIdentityExists() bool {
 	if openError != nil {
 		fmt.Println(openError)
 	}
+
+	file.Close()
 
 	return file != nil && openError == nil
 }
@@ -251,6 +271,8 @@ func (c *CloudKitKeyManager) SecretsFolder() string {
 	configFolder := strings.Join(components, "/")
 
 	file, err := os.Open(configFolder)
+	file.Close()
+
 	if err != nil {
 		// secrets folder doesn't exist yet, so create it
 		path, createErr := createSecretsFolder(configFolder)

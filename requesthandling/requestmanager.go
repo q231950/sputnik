@@ -35,6 +35,7 @@ func New(config RequestConfig, keyManager keymanager.KeyManager, database string
 // Request creates a signed request with the given parameters
 func (cm *CloudkitRequestManager) Request(p string, method string, payload string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
+	log.Error("keyID", keyID)
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)

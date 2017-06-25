@@ -105,6 +105,7 @@ func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 // PublicKey returns the public key that was generated when creating the signing identity
 func (c CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	if c.inMemoryPublicKey != nil {
+		log.Warn("Returning in memory public key")
 		return c.inMemoryPublicKey
 	}
 

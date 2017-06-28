@@ -30,12 +30,12 @@ type KeyManager interface {
 
 // CloudKitKeyManager is a concrete KeyManager
 type CloudKitKeyManager struct {
-	pemFileName   string
-	derFileName   string
-	keyIDFileName string
-	inMemoryKeyID string
-	inMemoryPrivateKey    *ecdsa.PrivateKey
-	inMemoryPublicKey    *ecdsa.PublicKey
+	pemFileName        string
+	derFileName        string
+	keyIDFileName      string
+	inMemoryKeyID      string
+	inMemoryPrivateKey *ecdsa.PrivateKey
+	inMemoryPublicKey  *ecdsa.PublicKey
 }
 
 // New returns a CloudKitKeyManager
@@ -44,7 +44,7 @@ func New() CloudKitKeyManager {
 }
 
 // KeyID looks up the CloudKit Key ID
-func (c CloudKitKeyManager) KeyID() string {
+func (c *CloudKitKeyManager) KeyID() string {
 	keyID := os.Getenv("SPUTNIK_CLOUDKIT_KEYID")
 	if len(keyID) <= 0 {
 		// no KeyID found in environment variables
@@ -60,29 +60,33 @@ func (c CloudKitKeyManager) KeyID() string {
 }
 
 // StoreKeyID stores the given ID to a file in Sputnik's secrets folder
-func (c CloudKitKeyManager) StoreKeyID(key string) error {
+func (c *CloudKitKeyManager) StoreKeyID(key string) error {
 	path := c.keyIDFilePath()
 	keyBytes := []byte(key)
 	return ioutil.WriteFile(path, keyBytes, 0644)
 }
 
 // storedKeyID looks up the Key ID in a file
-func (c CloudKitKeyManager) storedKeyID() (string, error) {
+func (c *CloudKitKeyManager) storedKeyID() (string, error) {
+	log.Info("Key ID", c, c.inMemoryKeyID)
 	if len(c.inMemoryKeyID) > 0 {
 		log.Info("Returning in-memory KeyID")
 		return c.inMemoryKeyID, nil
 	}
+
+	log.Info("Need to read Key ID from file")
 	path := c.keyIDFilePath()
 	keyBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
 	c.inMemoryKeyID = string(keyBytes)
+	log.Warn(c, c.inMemoryKeyID)
 	return c.inMemoryKeyID, nil
 }
 
 // PrivateKey returns the x509 private key that was generated when creating the signing identity
-func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
+func (c *CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	if c.inMemoryPrivateKey != nil {
 		log.WithFields(log.Fields{}).Info("Returning in memory private key")
 		return c.inMemoryPrivateKey
@@ -103,7 +107,7 @@ func (c CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 }
 
 // PublicKey returns the public key that was generated when creating the signing identity
-func (c CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
+func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	if c.inMemoryPublicKey != nil {
 		log.Warn("Returning in memory public key")
 		return c.inMemoryPublicKey

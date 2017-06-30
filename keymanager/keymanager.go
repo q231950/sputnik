@@ -157,13 +157,14 @@ func (c *CloudKitKeyManager) SigningIdentityExists() bool {
 	ecKeyPath := c.pemFilePath()
 
 	file, openError := os.Open(ecKeyPath)
+	defer file.Close()
+
 	if openError != nil {
 		fmt.Println(openError)
 	}
 
-	file.Close()
-
-	return file != nil && openError == nil
+	exists := file != nil && openError == nil
+	return exists
 }
 
 // keyIdFilePath represents the path to the Key ID file
@@ -276,7 +277,7 @@ func (c *CloudKitKeyManager) SecretsFolder() string {
 	configFolder := strings.Join(components, "/")
 
 	file, err := os.Open(configFolder)
-	file.Close()
+	defer file.Close()
 
 	if err != nil {
 		// secrets folder doesn't exist yet, so create it

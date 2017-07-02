@@ -16,7 +16,7 @@ This will create a `eckey.pem` and `cert.der` and place it in the `~/.sputnik/se
 
 ### Add public key to CloudKit Dashboard
 
-You may print out the key in a CloudKit understandable format. Copy the output and paste it as described in [the reference](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloutKitWebServicesReference/SettingUpWebServices/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW8)
+You may print out the key in a CloudKit understandable format. Copy the output and paste it as described in **Storing the Server-to-Server Public Key and Getting the Key Identifier** section of [the reference](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6)
 
 `./sputnik identity`
 
@@ -46,7 +46,7 @@ This is one sample GET request to CloudKit, using a specific container ID. If yo
 
 ## State
 
-> It's a 0.1
+> It's a 0.0.2
 
 
 ![Gemeinfrei, <a href="https://commons.wikimedia.org/w/index.php?curid=229349">Link</a>](resources/331px-Sputnik-stamp-ussr.jpg)

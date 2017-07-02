@@ -16,7 +16,7 @@ This will create a `eckey.pem` and `cert.der` and place it in the `~/.sputnik/se
 
 ### Add public key to CloudKit Dashboard
 
-You may print out the key in a CloudKit understandable format. Copy the output and paste it as described in **Storing the Server-to-Server Public Key and Getting the Key Identifier** section of [the reference](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6)
+You may print out the key in a CloudKit understandable format. Copy the output and paste it as described in the **Storing the Server-to-Server Public Key and Getting the Key Identifier** section of [the reference](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6)
 
 `./sputnik identity`
 
@@ -40,9 +40,21 @@ This will remove the signing identity local to your machine (any certificate & s
 
 ### Usage
 
-This is one sample GET request to CloudKit, using a specific container ID. If you want to make this request working for you, you need to change the container ID in `requestmanager.go` and recompile.
+[Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert cities into iCloud. The following is assuming **json** to be some meaningful data.
 
-`./sputnik ping`
+```go
+keyManager := keymanager.New()
+containerID := "iCloud.com.elbedev.bish"
+subpath := "records/modify"
+database := "public"
+
+config := requesthandling.RequestConfig{Version: "1", ContainerID: containerID}
+requestManager := requesthandling.New(config, &keyManager, database)
+
+request, error := requestManager.PostRequest(subpath, json)
+client := &http.Client{}
+response, error := client.Do(request)
+```
 
 ## State
 

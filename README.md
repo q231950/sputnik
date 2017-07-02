@@ -58,7 +58,7 @@ response, error := client.Do(request)
 
 ## State
 
-> It's a 0.0.2
+Even though this library works fine for [Baikonur](https://github.com/q231950/baikonur), please keep in mind that it's a [0.0.2](https://github.com/q231950/sputnik/releases).
 
 
 ![Gemeinfrei, <a href="https://commons.wikimedia.org/w/index.php?curid=229349">Link</a>](resources/331px-Sputnik-stamp-ussr.jpg)

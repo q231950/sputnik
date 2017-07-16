@@ -30,6 +30,7 @@ type KeyManager interface {
 
 // CloudKitKeyManager is a concrete KeyManager
 type CloudKitKeyManager struct {
+	secretsFolder      string
 	pemFileName        string
 	derFileName        string
 	keyIDFileName      string
@@ -38,9 +39,26 @@ type CloudKitKeyManager struct {
 	inMemoryPublicKey  *ecdsa.PublicKey
 }
 
-// New returns a CloudKitKeyManager
+// New returns a CloudKitKeyManager with the default secrets folder
+// By default, a CloudKitKeyManager expects the secrets in the .sputnik folder of the home directory
 func New() CloudKitKeyManager {
-	return CloudKitKeyManager{pemFileName: "eckey.pem", derFileName: "cert.der", keyIDFileName: "keyid.txt"}
+	homeDir := homeDir()
+	components := []string{homeDir, ".sputnik", "secrets"}
+	secretsFolder := strings.Join(components, "/")
+
+	keyIDFileName := "keyid.txt"
+
+	return NewWithSecretsFolder(secretsFolder, keyIDFileName)
+}
+
+// NewWithSecretsFolder returns a CloudKitKeyManager with a specific secrets folder
+// Use this to specify a different storage location from the default
+func NewWithSecretsFolder(secretsFolder string, keyIDFileName string) CloudKitKeyManager {
+	return CloudKitKeyManager{
+		secretsFolder: secretsFolder,
+		pemFileName:   "eckey.pem",
+		derFileName:   "cert.der",
+		keyIDFileName: keyIDFileName}
 }
 
 // KeyID looks up the CloudKit Key ID
@@ -273,17 +291,12 @@ func (c *CloudKitKeyManager) createDerEncodedCertificate() error {
 
 // SecretsFolder returns the path to Sputnik's secrets folder
 func (c *CloudKitKeyManager) SecretsFolder() string {
-	homeDir := homeDir()
-
-	components := []string{homeDir, ".sputnik", "secrets"}
-	configFolder := strings.Join(components, "/")
-
-	file, err := os.Open(configFolder)
+	file, err := os.Open(c.secretsFolder)
 	defer file.Close()
 
 	if err != nil {
 		// secrets folder doesn't exist yet, so create it
-		path, createErr := createSecretsFolder(configFolder)
+		path, createErr := createSecretsFolder(c.secretsFolder)
 		if createErr != nil {
 			log.Debugf("%s", createErr)
 		}

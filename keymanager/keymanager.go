@@ -192,7 +192,9 @@ func (c *CloudKitKeyManager) ECKey() string {
 	return string(bytes)
 }
 
-// CreateSigningIdentity creates a new signing identity
+// CreateSigningIdentity creates a new signing identity.
+//
+// You can paste the signing identity to your iCloud Dashboard when creating a new API Access Key.
 func (c *CloudKitKeyManager) CreateSigningIdentity() error {
 	err := c.createPemEncodedCertificate()
 	if err != nil {

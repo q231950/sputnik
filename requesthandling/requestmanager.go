@@ -32,32 +32,30 @@ func New(config RequestConfig, keyManager keymanager.KeyManager, database string
 	return CloudkitRequestManager{Config: config, keyManager: keyManager, database: database}
 }
 
+// PostRequest is a convenience method for creating POST requests
+func (cm CloudkitRequestManager) PostRequest(operationPath string, body string) (*http.Request, error) {
+	return cm.Request(operationPath, "POST", body)
+}
+
 // Request creates a signed request with the given parameters
 func (cm *CloudkitRequestManager) Request(p string, method string, payload string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
-	log.WithFields(log.Fields{"KeyID": keyID}).Info("!")
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)
 	message := cm.message(currentDate, hashedBody, path)
-	log.WithFields(log.Fields{
-		"date": currentDate,
-		"body": hashedBody,
-		"path": path}).Info("message")
-
 	signature := cm.SignatureForMessage([]byte(message))
 	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
-	log.WithFields(log.Fields{"encoded signature": encodedSignature}).Info("Base64 encoded sha256 signed message.")
-
 	url := "https://api.apple-cloudkit.com" + path
-	log.WithFields(log.Fields{"path": path}).Info("Request path")
 
-	return cm.request(string(method), url, []byte(payload), keyID, currentDate, encodedSignature)
-}
+	log.WithFields(log.Fields{
+		"key id": keyID,
+		"date":   currentDate,
+		"body":   hashedBody,
+		"base64 encoded signature": encodedSignature,
+		"path": path}).Debug("Creating request")
 
-// PostRequest is a sample request, only used for experimenting purposes
-func (cm CloudkitRequestManager) PostRequest(operationPath string, body string) (*http.Request, error) {
-	return cm.Request(operationPath, "POST", body)
+	return cm.requestWithHeaders(string(method), url, []byte(payload), keyID, currentDate, encodedSignature)
 }
 
 // request creates a request with the given parameters.
@@ -67,7 +65,7 @@ func (cm CloudkitRequestManager) PostRequest(operationPath string, body string) 
 //	- keyID Header parameter X-Apple-CloudKit-Request-KeyID
 //	- date Header parameter X-Apple-CloudKit-Request-ISO8601Date
 //	- signature Header parameter X-Apple-CloudKit-Request-SignatureV1
-func (cm *CloudkitRequestManager) request(method string, url string, body []byte, keyID string, date string, signature string) (request *http.Request, err error) {
+func (cm *CloudkitRequestManager) requestWithHeaders(method string, url string, body []byte, keyID string, date string, signature string) (request *http.Request, err error) {
 	request, err = http.NewRequest(method, url, bytes.NewBuffer(body))
 	request.Header.Set("X-Apple-CloudKit-Request-KeyID", keyID)
 	request.Header.Set("X-Apple-CloudKit-Request-ISO8601Date", date)

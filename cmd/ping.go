@@ -21,10 +21,10 @@
 package cmd
 
 import (
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	log "github.com/apex/log"
 
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/q231950/sputnik/requesthandling"
@@ -61,7 +61,7 @@ var pingCmd = &cobra.Command{
 	}`
 		request, err := requestManager.PostRequest(subpath, body)
 		if err == nil {
-			fmt.Println(request)
+			log.Debugf("%s", request)
 		} else {
 			log.Fatal("Failed to create ping request")
 		}
@@ -73,10 +73,10 @@ var pingCmd = &cobra.Command{
 		}
 		defer resp.Body.Close()
 
-		fmt.Println("response Status:", resp.Status)
-		fmt.Println("response Headers:", resp.Header)
+		log.Debugf("response Status: %s", resp.Status)
+		log.Debugf("response Headers: %s", resp.Header)
 		responseBody, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println("response Body:", string(responseBody))
+		log.Debugf("response Body: %s", string(responseBody))
 	},
 }
 

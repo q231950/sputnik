@@ -21,25 +21,32 @@
 package cmd
 
 import (
-	"fmt"
+	log "github.com/apex/log"
 
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
 
-// identityCmd represents the eckey command
+// The identity command shows the current identity.
 var eckeyCmd = &cobra.Command{
 	Use:   "identity",
 	Short: "Show the signing identity",
-	Long:  `Show the signing identity that is used for signing the CloudKit requests.`,
+	Long:  `Show the signing identity that is used for signing the iCloud requests.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Info("Attempting to retrieve the current identity...")
 		keyManager := keymanager.New()
 		keyExists := keyManager.SigningIdentityExists()
 		if keyExists {
 			identity := keyManager.ECKey()
-			fmt.Println(identity)
+			log.Debug("The current identity you can create a new server-to-server key with in the iCloud Dashboard:")
+			log.Debug(identity)
+
+			keyID := keyManager.KeyID()
+			if len(keyID) == 0 {
+				log.Error("No iCloud KeyID specified. Please either provide one by `sputnik keyid store <your KeyID>` or set the environment variable `SPUTNIK_CLOUDKIT_KEYID`.")
+			}
 		} else {
-			fmt.Println("A signing identity could not be found. You can create one by `./sputnik identity create`")
+			log.Error("A signing identity could not be found. A signing identity can be created by `./sputnik identity create`")
 		}
 	},
 }

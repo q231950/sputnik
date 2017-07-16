@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/apex/log"
 	"github.com/q231950/sputnik/keymanager"
 )
 
@@ -39,11 +39,11 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)
-	log.WithFields(log.Fields{
-		"body": string(hashedBody)}).Info("sha256")
+	// log.WithFields(log.Fields{
+	// 	"body": string(hashedBody)}).Info("sha256")
 
-	encodedBody := base64.StdEncoding.EncodeToString([]byte(payload))
-	log.WithFields(log.Fields{"encoded body": encodedBody}).Info("base64 of sha256")
+	// encodedBody := base64.StdEncoding.EncodeToString([]byte(payload))
+	// log.WithFields(log.Fields{"encoded body": encodedBody}).Info("base64 of sha256")
 
 	message := cm.message(currentDate, hashedBody, path)
 	log.WithFields(log.Fields{
@@ -53,7 +53,7 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 
 	signature := cm.SignatureForMessage([]byte(message))
 	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
-	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
+	log.WithFields(log.Fields{"encoded signature": encodedSignature}).Info("Base64 encoded sha256 signed message.")
 
 	url := "https://api.apple-cloudkit.com" + path
 	log.WithFields(log.Fields{"url": url}).Info("path")
@@ -116,7 +116,7 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 	if priv != nil {
 		signature, err := priv.Sign(rand, h.Sum(nil), opts)
 		if err != nil {
-			log.Error("unable to sign", err)
+			log.WithError(err).Error("Unable to sign")
 		}
 
 		return signature

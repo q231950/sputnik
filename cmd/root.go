@@ -21,8 +21,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+
+	log "github.com/apex/log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +37,7 @@ var RootCmd = &cobra.Command{
 	Short: "sputnik talks to Shelve",
 	Long: `спутник talks to Shelve:
 
-Shelve is an iOS app in developement that uses CloudKit for storing data in the cloud︎.️`,
+Shelve is an iOS app in development that uses CloudKit for storing data in the cloud︎.️`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:⛅️
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -46,7 +47,7 @@ Shelve is an iOS app in developement that uses CloudKit for storing data in the 
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Errorf("%s", err)
 		os.Exit(-1)
 	}
 }
@@ -76,6 +77,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Debugf("Using config file: `%s`", viper.ConfigFileUsed())
 	}
 }

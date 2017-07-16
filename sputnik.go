@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+
+	log "github.com/apex/log"
 
 	"github.com/q231950/sputnik/keymanager"
 	requests "github.com/q231950/sputnik/requesthandling"
@@ -48,5 +49,5 @@ func request(path string, method HTTPMethod, payload string, containerID string)
 
 // Hello makes sure that the earth is still spinning around the sun
 func Hello() {
-	fmt.Println("This is спутник.")
+	log.Debug("This is спутник.")
 }

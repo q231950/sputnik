@@ -1,9 +1,7 @@
 package keymanager
 
 import (
-	"crypto/dsa"
 	"crypto/ecdsa"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"io/ioutil"
@@ -107,12 +105,14 @@ func (c *CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error("No der file found. create one by `sputnik eckey create`")
+		return nil
 	}
 
 	privateKey, err := x509.ParseECPrivateKey(bytes)
 	if err != nil {
 		log.Error("Failed to parse private ec key from pem:")
 		log.Errorf("%s", err)
+		return nil
 	}
 
 	c.inMemoryPrivateKey = privateKey
@@ -139,18 +139,12 @@ func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	}
 
 	switch pub := pub.(type) {
-	case *rsa.PublicKey:
-		log.Debugf("pub is of type RSA:", pub)
-	case *dsa.PublicKey:
-		log.Debugf("pub is of type DSA:", pub)
 	case *ecdsa.PublicKey:
 		c.inMemoryPublicKey = pub
 		return pub
 	default:
 		panic("unknown type of public key")
 	}
-
-	return nil
 }
 
 // PrivatePublicKeyWriter should be named differently. It reads and returns the PEM encoded signing identity

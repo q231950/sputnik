@@ -5,15 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/q231950/sputnik/keymanager"
-	keymanagerMock "github.com/q231950/sputnik/keymanager/mocks"
+	mocks "github.com/q231950/sputnik/keymanager/mocks"
 )
 
 // This Example shows how to create a request manager.
 //
 // A request manager requires a keymanager for handling authentication as well as a valid configuration. It currently also needs to know which database to talk to.
 func ExampleRequestManager() {
-	keyManager := keymanager.New()
+	keyManager := mocks.MockKeyManager{}
 	containerID := "iCloud.com.mycontainer"
 	config := RequestConfig{Version: "1", ContainerID: containerID}
 	database := "public"
@@ -25,7 +24,7 @@ func ExampleRequestManager() {
 }
 
 func TestPostRequest(t *testing.T) {
-	keyManager := keymanagerMock.MockKeyManager{}
+	keyManager := mocks.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
 	database := "public"
 	requestManager := New(config, &keyManager, database)
@@ -41,7 +40,7 @@ func TestPostRequest(t *testing.T) {
 }
 
 func TestNewRequestManager(t *testing.T) {
-	keyManager := keymanagerMock.MockKeyManager{}
+	keyManager := mocks.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
 	database := "database"
 	requestManager := New(config, keyManager, database)
@@ -55,7 +54,7 @@ func TestNewRequestManager(t *testing.T) {
 }
 
 func TestPostRequest2(t *testing.T) {
-	keyManager := keymanagerMock.MockKeyManager{}
+	keyManager := mocks.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
 	database := "public"
 	requestManager := New(config, &keyManager, database)
@@ -71,7 +70,7 @@ func TestPostRequest2(t *testing.T) {
 }
 
 func TestRequest(t *testing.T) {
-	keyManager := keymanagerMock.MockKeyManager{}
+	keyManager := mocks.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
 	database := "public"
 	requestManager := New(config, &keyManager, database)
@@ -93,7 +92,7 @@ func TestRequest(t *testing.T) {
 }
 
 func TestPayloadFormat(t *testing.T) {
-	keyManager := keymanagerMock.MockKeyManager{}
+	keyManager := mocks.MockKeyManager{}
 	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
 	database := "public"
 	requestManager := New(config, &keyManager, database)

@@ -63,30 +63,7 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 
 // PostRequest is a sample request, only used for experimenting purposes
 func (cm CloudkitRequestManager) PostRequest(operationPath string, body string) (*http.Request, error) {
-	keyID := cm.keyManager.KeyID()
-	currentDate := cm.formattedTime(time.Now())
-	path := cm.subpath(operationPath)
-	hashedBody := cm.HashedBody(body)
-	log.WithFields(log.Fields{
-		"body": string(hashedBody)}).Info("sha256")
-
-	encodedBody := base64.StdEncoding.EncodeToString([]byte(body))
-	log.WithFields(log.Fields{"encoded body": encodedBody}).Info("base64 of sha256")
-
-	message := cm.message(currentDate, hashedBody, path)
-	log.WithFields(log.Fields{
-		"date": currentDate,
-		"body": hashedBody,
-		"path": path}).Info("message")
-
-	signature := cm.SignatureForMessage([]byte(message))
-	encodedSignature := string(base64.StdEncoding.EncodeToString(signature))
-	log.WithFields(log.Fields{"message": encodedSignature}).Info("base64 of signed sha256")
-
-	url := "https://api.apple-cloudkit.com" + path
-	log.WithFields(log.Fields{"url": url}).Info("path")
-
-	return cm.request("POST", url, []byte(body), keyID, currentDate, encodedSignature)
+	return cm.Request(operationPath, "POST", body)
 }
 
 // request creates a request with the given parameters.

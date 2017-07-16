@@ -9,14 +9,17 @@ import (
 	keymanagerMock "github.com/q231950/sputnik/keymanager/mocks"
 )
 
-func ExampleRequestManagerT() {
+// ExampleRequestManager Shows you how to create a request manager
+func ExampleRequestManager() {
 	keyManager := keymanager.New()
-	containerID := "iCloud.com.elbedev.bishcommunity"
+	containerID := "iCloud.com.mycontainer"
 	config := RequestConfig{Version: "1", ContainerID: containerID}
 	database := "public"
 	requestManager := New(config, &keyManager, database)
-	fmt.Println(requestManager)
-	// Output: something
+	fmt.Printf("Container:%s, Version:%s",
+		requestManager.Config.ContainerID,
+		requestManager.Config.Version)
+	// Output: Container:iCloud.com.mycontainer, Version:1
 }
 
 func TestPostRequest(t *testing.T) {

@@ -30,9 +30,8 @@ func Post(path string, payload string, containerID string) (*http.Response, erro
 func request(path string, method HTTPMethod, payload string, containerID string) (*http.Response, error) {
 
 	keyManager := keymanager.New()
-	config := requests.RequestConfig{Version: "1", ContainerID: containerID}
-	database := "public"
-	requestManager := requests.New(config, &keyManager, database)
+	config := requests.RequestConfig{Version: "1", ContainerID: containerID, Database: "public"}
+	requestManager := requests.New(config, &keyManager)
 
 	request, err := requestManager.Request(path, string(method), payload)
 	if err != nil {

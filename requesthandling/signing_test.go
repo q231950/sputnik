@@ -14,10 +14,9 @@ type TestableRequestManager interface {
 
 func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
-	request, _ := requestManager.PostRequest("users/caller", ``)
+	config := RequestConfig{Version: "1", ContainerID: "containerid", Database: "public"}
+	requestManager := New(config, &keyManager)
+	request, _ := requestManager.PostRequest("users/caller", "")
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 
 	expectedTime := time.Now().UTC()
@@ -33,9 +32,8 @@ func TestPostRequestDateParameterIsInPerimeter(t *testing.T) {
 
 func TestMessageFormat(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "containerid"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
+	config := RequestConfig{Version: "1", ContainerID: "containerid", Database: "public"}
+	requestManager := New(config, &keyManager)
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")
@@ -44,9 +42,8 @@ func TestMessageFormat(t *testing.T) {
 
 func TestEmptyHashedBody(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	config := NewRequestConfig("version", "containerID")
-	database := "public"
-	requestManager := TestableRequestManager(&CloudkitRequestManager{config, &keyManager, database})
+	config := NewRequestConfig("version", "containerID", "public")
+	requestManager := TestableRequestManager(&CloudkitRequestManager{config, &keyManager})
 	body := ""
 	hash := requestManager.HashedBody(body)
 
@@ -57,9 +54,8 @@ func TestEmptyHashedBody(t *testing.T) {
 
 func TestSignMessage(t *testing.T) {
 	keyManager := keymanager.MockKeyManager{}
-	config := NewRequestConfig("version", "containerID")
-	database := "database"
-	r := New(config, &keyManager, database)
+	config := NewRequestConfig("version", "containerID", "public")
+	r := New(config, &keyManager)
 	signature := r.SignatureForMessage([]byte("message"))
 
 	if signature == nil {

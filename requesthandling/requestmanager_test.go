@@ -10,13 +10,12 @@ import (
 
 // This Example shows how to create a request manager.
 //
-// A request manager requires a keymanager for handling authentication as well as a valid configuration. It currently also needs to know which database to talk to.
+// A request manager requires a keymanager for handling authentication as well as a valid configuration.
 func ExampleRequestManager() {
 	keyManager := mocks.MockKeyManager{}
 	containerID := "iCloud.com.mycontainer"
-	config := RequestConfig{Version: "1", ContainerID: containerID}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
+	config := RequestConfig{Version: "1", ContainerID: containerID, Database: "public"}
+	requestManager := New(config, &keyManager)
 	fmt.Printf("Container:%s, Version:%s",
 		requestManager.Config.ContainerID,
 		requestManager.Config.Version)
@@ -25,10 +24,9 @@ func ExampleRequestManager() {
 
 func TestPostRequest(t *testing.T) {
 	keyManager := mocks.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
-	request, err := requestManager.PostRequest("records/modify", ``)
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev", Database: "public"}
+	requestManager := New(config, &keyManager)
+	request, err := requestManager.PostRequest("records/modify", "")
 
 	if request == nil {
 		t.Errorf("The Post Request must not be nil")
@@ -41,24 +39,18 @@ func TestPostRequest(t *testing.T) {
 
 func TestNewRequestManager(t *testing.T) {
 	keyManager := mocks.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-	database := "database"
-	requestManager := New(config, keyManager, database)
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev", Database: "public"}
+	requestManager := New(config, keyManager)
 	if requestManager.keyManager != keyManager {
 		t.Errorf("A Request Manager's key manager should be the same that was used at initialisation")
-	}
-
-	if requestManager.database != "database" {
-		t.Errorf("A Request Manager's database should not change after initialisation")
 	}
 }
 
 func TestPostRequest2(t *testing.T) {
 	keyManager := mocks.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
-	request, err := requestManager.PostRequest("records/modify", ``)
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev", Database: "public"}
+	requestManager := New(config, &keyManager)
+	request, err := requestManager.PostRequest("records/modify", "")
 
 	if request == nil {
 		t.Errorf("The Post Request must not be nil")
@@ -71,9 +63,8 @@ func TestPostRequest2(t *testing.T) {
 
 func TestRequest(t *testing.T) {
 	keyManager := mocks.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev", Database: "public"}
+	requestManager := New(config, &keyManager)
 	request, _ := requestManager.Request("/some/subpath", "GET", `{"key":"value", "keys":["value1", "value2"]}`)
 	dateString := request.Header.Get("X-Apple-CloudKit-Request-ISO8601Date")
 	if request == nil {
@@ -93,9 +84,8 @@ func TestRequest(t *testing.T) {
 
 func TestPayloadFormat(t *testing.T) {
 	keyManager := mocks.MockKeyManager{}
-	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev"}
-	database := "public"
-	requestManager := New(config, &keyManager, database)
+	config := RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.shelve.dev", Database: "public"}
+	requestManager := New(config, &keyManager)
 	message := requestManager.message("date", "body", "service url")
 	if message != "date:body:service url" {
 		t.Errorf("The request payload needs to be properly formatted")

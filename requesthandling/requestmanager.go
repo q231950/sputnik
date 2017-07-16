@@ -24,12 +24,11 @@ type RequestManager interface {
 type CloudkitRequestManager struct {
 	Config     RequestConfig
 	keyManager keymanager.KeyManager
-	database   string
 }
 
 // New creates a new RequestManager
-func New(config RequestConfig, keyManager keymanager.KeyManager, database string) CloudkitRequestManager {
-	return CloudkitRequestManager{Config: config, keyManager: keyManager, database: database}
+func New(config RequestConfig, keyManager keymanager.KeyManager) CloudkitRequestManager {
+	return CloudkitRequestManager{Config: config, keyManager: keyManager}
 }
 
 // PostRequest is a convenience method for creating POST requests
@@ -99,7 +98,7 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 func (cm *CloudkitRequestManager) subpath(path string) string {
 	version := cm.Config.Version
 	containerID := cm.Config.ContainerID
-	components := []string{"/database", version, containerID, "development", cm.database, path}
+	components := []string{"/database", version, containerID, "development", cm.Config.Database, path}
 	return strings.Join(components, "/")
 }
 

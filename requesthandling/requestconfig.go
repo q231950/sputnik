@@ -4,9 +4,10 @@ package requesthandling
 type RequestConfig struct {
 	Version     string
 	ContainerID string
+	Database    string
 }
 
 // NewRequestConfig creates a fresh config with the given version and container ID
-func NewRequestConfig(version string, containerID string) RequestConfig {
-	return RequestConfig{Version: version, ContainerID: containerID}
+func NewRequestConfig(version string, containerID string, database string) RequestConfig {
+	return RequestConfig{Version: version, ContainerID: containerID, Database: database}
 }

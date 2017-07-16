@@ -39,12 +39,6 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)
-	// log.WithFields(log.Fields{
-	// 	"body": string(hashedBody)}).Info("sha256")
-
-	// encodedBody := base64.StdEncoding.EncodeToString([]byte(payload))
-	// log.WithFields(log.Fields{"encoded body": encodedBody}).Info("base64 of sha256")
-
 	message := cm.message(currentDate, hashedBody, path)
 	log.WithFields(log.Fields{
 		"date": currentDate,
@@ -56,7 +50,7 @@ func (cm *CloudkitRequestManager) Request(p string, method string, payload strin
 	log.WithFields(log.Fields{"encoded signature": encodedSignature}).Info("Base64 encoded sha256 signed message.")
 
 	url := "https://api.apple-cloudkit.com" + path
-	log.WithFields(log.Fields{"url": url}).Info("path")
+	log.WithFields(log.Fields{"path": path}).Info("Request path")
 
 	return cm.request(string(method), url, []byte(payload), keyID, currentDate, encodedSignature)
 }
@@ -93,13 +87,13 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 	if priv != nil {
 		signature, err := priv.Sign(rand, h.Sum(nil), opts)
 		if err != nil {
-			log.WithError(err).Error("Unable to sign")
+			log.WithError(err).Error("Unable to sign message")
 		}
 
 		return signature
 	}
 
-	log.Error("Can't sign without a private key")
+	log.Fatal("Can't sign without a private key")
 
 	return nil
 }

@@ -9,7 +9,9 @@ import (
 	keymanagerMock "github.com/q231950/sputnik/keymanager/mocks"
 )
 
-// ExampleRequestManager Shows you how to create a request manager
+// This Example shows how to create a request manager.
+//
+// A request manager requires a keymanager for handling authentication as well as a valid configuration. It currently also needs to know which database to talk to.
 func ExampleRequestManager() {
 	keyManager := keymanager.New()
 	containerID := "iCloud.com.mycontainer"

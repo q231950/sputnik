@@ -21,7 +21,8 @@
 package cmd
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/apex/log"
+
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
@@ -34,8 +35,14 @@ var keyidCmd = &cobra.Command{
 	#1 use the Sputnik command 'keyid store <your key id>'
 	#2 by setting an environment variable 'SPUTNIK_CLOUDKIT_KEYID'`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Info("Attempting to retrieve the current key id...")
 		keyManager := keymanager.New()
-		log.WithFields(log.Fields{"keyId": keyManager.KeyID()}).Info("`keyid`")
+		keyID := keyManager.KeyID()
+		if len(keyID) > 0 {
+			log.Infof("The following key id is stored: `%s`", keyID)
+		} else {
+			log.Error("No iCloud key id specified. Please either provide one by `sputnik keyid store <your KeyID>` or set the environment variable `SPUTNIK_CLOUDKIT_KEYID`.")
+		}
 	},
 }
 

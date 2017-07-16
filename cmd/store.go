@@ -21,7 +21,7 @@
 package cmd
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/apex/log"
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
@@ -38,27 +38,16 @@ var storeCmd = &cobra.Command{
 			keyManager := keymanager.New()
 			err := keyManager.StoreKeyID(keyID)
 			if err != nil {
-				log.Error(err)
+				log.Errorf("Failed to store kei id (%s)", err)
 			} else {
-				log.WithFields(log.Fields{"keyid": keyID}).Info("stored")
+				log.Infof("The following key id has been stored: `%s`", keyID)
 			}
 		} else {
-			log.Error("`keyid store` requires one argument which is the keyId to store.")
+			log.Error("`keyid store` requires one argument which is the key id to store.")
 		}
 	},
 }
 
 func init() {
 	keyidCmd.AddCommand(storeCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// storeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// storeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }

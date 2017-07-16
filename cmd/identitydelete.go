@@ -21,8 +21,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	log "github.com/apex/log"
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
 )
@@ -34,13 +33,14 @@ var identitydeleteCmd = &cobra.Command{
 	Long: `
 	This command is destructive!
 
-	'remove' removes the current signing identity. This makes the key ID in the Cloudkit Dashboard useless. After running this command you should also revoke the key ID from https://icloud.developer.apple.com/dashboard/.`,
+	'remove' removes the current signing identity. This makes the key ID in the Cloudkit Dashboard useless. After running this command you should also revoke the key ID in the matching container in your https://icloud.developer.apple.com/dashboard/.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Info("Attempting to remove the current identity...")
 		keyManager := keymanager.New()
 		if keyManager.SigningIdentityExists() {
 			removeSigningIdentity(&keyManager)
 		} else {
-			fmt.Println("There is no signing identity to remove.")
+			log.Warn("There is no signing identity to remove.")
 		}
 	},
 }
@@ -50,13 +50,11 @@ func removeSigningIdentity(keyManager keymanager.KeyManager) {
 	keyID := keyManager.KeyID()
 	err := keyManager.RemoveSigningIdentity()
 	if err != nil {
-		fmt.Println("An error occurred while removing the signing identity", err)
+		log.Errorf("An error occurred while removing the signing identity (%s)", err)
 	} else {
-		fmt.Println("Your signing identity has been removed. Make sure to revoke the corresponding KeyID in the Cloudkit Dashboard.")
-		fmt.Println("The identity with the following public key was removed:")
-		fmt.Println(pub)
-		fmt.Println("The following key ID is now useless (unless you kept a copy of the private key somewhere outside of Sputnik)")
-		fmt.Println(keyID)
+		log.Info("Your signing identity has been removed. Make sure to revoke the corresponding KeyID in the Cloudkit Dashboard.")
+		log.Infof("The identity with the following public key was removed:\n%s", pub)
+		log.Infof("The following key ID is now useless (unless you kept a copy of the private key somewhere outside of Sputnik):\n%s", keyID)
 	}
 }
 

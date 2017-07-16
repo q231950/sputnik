@@ -21,7 +21,7 @@
 package cmd
 
 import (
-	"fmt"
+	log "github.com/apex/log"
 
 	"github.com/q231950/sputnik/keymanager"
 	"github.com/spf13/cobra"
@@ -33,6 +33,7 @@ var createCmd = &cobra.Command{
 	Short: "Creates a new signing identity",
 	Long:  `For now, a file named eckey.pem will be put into the secrets folder.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Infof("Attempting to create a new identity...")
 		createECKey()
 	},
 }
@@ -45,13 +46,16 @@ func createECKey() {
 	keyManager := keymanager.New()
 	exists := keyManager.SigningIdentityExists()
 	if exists {
-		fmt.Println("The ec key exists already, this is it:")
-		_ = keyManager.ECKey()
+		log.Error("There is an existing identity. You need to remove it with `./sputnik identity remove` before you can create a new one.")
+		if len(keyManager.KeyID()) != 0 {
+			// a key ID has been stored
+			log.Infof("The current identity is linked with the following iCloud key ID:\n%s", keyManager.KeyID())
+		} else {
+			log.Infof("This is the current identity:\n%s", keyManager.ECKey())
+		}
 	} else {
-		fmt.Println("The ec key does not exist, need to create, one moment, please")
+		log.Info("Creating an identity")
 		keyManager.CreateSigningIdentity()
-
-		fmt.Println("Ok, here it is")
-		_ = keyManager.ECKey()
+		log.Info("Done")
 	}
 }

@@ -45,17 +45,19 @@ func New() CloudKitKeyManager {
 	secretsFolder := strings.Join(components, "/")
 
 	keyIDFileName := "keyid.txt"
+	derFileName := "cert.der"
+	pemFileName := "eckey.pem"
 
-	return NewWithSecretsFolder(secretsFolder, keyIDFileName)
+	return NewWithSecretsFolder(secretsFolder, keyIDFileName, derFileName, pemFileName)
 }
 
 // NewWithSecretsFolder returns a CloudKitKeyManager with a specific secrets folder
 // Use this to specify a different storage location from the default
-func NewWithSecretsFolder(secretsFolder string, keyIDFileName string) CloudKitKeyManager {
+func NewWithSecretsFolder(secretsFolder string, keyIDFileName string, derFileName string, pemFileName string) CloudKitKeyManager {
 	return CloudKitKeyManager{
 		secretsFolder: secretsFolder,
-		pemFileName:   "eckey.pem",
-		derFileName:   "cert.der",
+		pemFileName:   pemFileName,
+		derFileName:   derFileName,
 		keyIDFileName: keyIDFileName}
 }
 
@@ -130,6 +132,7 @@ func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	block, _ := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
 		log.Error("Failed to decode PEM block containing public key.")
+		return nil
 	}
 
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
@@ -220,6 +223,9 @@ func (c *CloudKitKeyManager) CreateSigningIdentity() error {
 
 // RemoveSigningIdentity removes the existing signing identity
 func (c *CloudKitKeyManager) RemoveSigningIdentity() error {
+	c.inMemoryPrivateKey = nil
+	c.inMemoryPublicKey = nil
+
 	removePemCommand := exec.Command("rm", c.pemFilePath())
 	err := removePemCommand.Run()
 	if err != nil {

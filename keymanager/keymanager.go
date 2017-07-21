@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -127,27 +128,29 @@ func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 		return c.inMemoryPublicKey
 	}
 
+	var err error
+	var pub interface{}
 	pemString := c.PrivatePublicKeyWriter()
 	pemData := []byte(pemString)
 	block, _ := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
-		log.Error("Failed to decode PEM block containing public key.")
-		return nil
+		err = errors.New("failed to decode PEM block containing public key")
+	} else {
+		pub, err = x509.ParsePKIXPublicKey(block.Bytes)
+
+		switch pub := pub.(type) {
+		case *ecdsa.PublicKey:
+			c.inMemoryPublicKey = pub
+			return pub
+		}
 	}
 
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		log.Error("Unable to parse public key from certificate:")
+		log.Error("unable to parse public key from certificate:")
 		log.Errorf("%s", err)
 	}
 
-	switch pub := pub.(type) {
-	case *ecdsa.PublicKey:
-		c.inMemoryPublicKey = pub
-		return pub
-	default:
-		panic("unknown type of public key")
-	}
+	return nil
 }
 
 // PrivatePublicKeyWriter should be named differently. It reads and returns the PEM encoded signing identity

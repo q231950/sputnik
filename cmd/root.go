@@ -34,13 +34,10 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "sputnik",
-	Short: "sputnik talks to Shelve",
-	Long: `спутник talks to Shelve:
+	Short: "sputnik talks to iCloud",
+	Long: `спутник talks to iCloud:
 
-Shelve is an iOS app in development that uses CloudKit for storing data in the cloud︎.️`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:⛅️
-	//	Run: func(cmd *cobra.Command, args []string) { },
+Easily communicate server to server using CloudKit in the app and Go in your backend.️`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.

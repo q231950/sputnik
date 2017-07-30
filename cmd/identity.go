@@ -35,7 +35,11 @@ var eckeyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Attempting to retrieve the current identity...")
 		keyManager := keymanager.New()
-		keyExists := keyManager.SigningIdentityExists()
+		keyExists, err := keyManager.SigningIdentityExists()
+		if err != nil {
+			log.Errorf("Error in SigningIdentityExists: %s", err)
+		}
+
 		if keyExists {
 			identity := keyManager.ECKey()
 			log.Debug("The current identity you can create a new server-to-server key with in the iCloud Dashboard:")

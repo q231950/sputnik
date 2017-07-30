@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	log "github.com/apex/log"
-	"github.com/fatih/color"
 )
 
 // KeyIDEnvironmentVariableName is the constant used for identifying the Key ID environment variable
@@ -168,13 +167,13 @@ func (c *CloudKitKeyManager) PrivatePublicKeyWriter() string {
 }
 
 // SigningIdentityExists checks if a signing identity has been created
-func (c *CloudKitKeyManager) SigningIdentityExists() bool {
+func (c *CloudKitKeyManager) SigningIdentityExists() (bool, error) {
 	ecKeyPath := c.pemFilePath()
 
 	file, openError := os.Open(ecKeyPath)
 	defer file.Close()
 
-	return file != nil && openError == nil
+	return file != nil && openError == nil, openError
 }
 
 // keyIdFilePath represents the path to the Key ID file
@@ -245,10 +244,6 @@ func (c *CloudKitKeyManager) RemoveSigningIdentity() error {
 
 	removeKeyIDCommand := exec.Command("rm", c.keyIDFilePath())
 	err = removeKeyIDCommand.Run()
-	if err != nil {
-		log.Error("Unable to remove key ID")
-		log.Errorf("%s", err)
-	}
 
 	return err
 }
@@ -271,7 +266,7 @@ func (c *CloudKitKeyManager) createPemEncodedCertificate() error {
 		log.Errorf("%s", err)
 	}
 
-	color.Green("Done creating PEM")
+	log.Info("Done creating PEM")
 
 	return err
 }

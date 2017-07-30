@@ -77,7 +77,8 @@ func TestStoreKeyID(t *testing.T) {
 func TestSigningIdentityExists(t *testing.T) {
 	pathToFixtures := "./fixtures"
 	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
-	assert.True(t, manager.SigningIdentityExists(), "The signing identity should exist in this fixture")
+	exists, _ := manager.SigningIdentityExists()
+	assert.True(t, exists, "The signing identity should exist in this fixture")
 }
 
 func TestECKey(t *testing.T) {

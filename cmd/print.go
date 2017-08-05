@@ -38,15 +38,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Info("Attempting to print the identity")
+
 		keyManager := keymanager.New()
-		exists := keyManager.SigningIdentityExists()
+		exists, err := keyManager.SigningIdentityExists()
+		if err != nil {
+			log.Errorf("Error in SigningIdentityExists: %s", err)
+		}
 		if exists {
-			log.Debugf("Printing the public/private keys:\n%s", keyManager.PrivatePublicKeyWriter())
+			log.Infof("Printing the public/private keys:\n%s", keyManager.PrivatePublicKeyWriter())
 		} else {
-			log.Debug("The ec key does not exist, need to create, one moment, please")
+			log.Info("The ec key does not exist, need to create, one moment, please")
 			keyManager.CreateSigningIdentity()
 
-			log.Debugf("Ok done. This is it: \n%s", keyManager.PrivatePublicKeyWriter())
+			log.Infof("Ok done. This is it: \n%s", keyManager.PrivatePublicKeyWriter())
 		}
 	},
 }

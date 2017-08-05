@@ -12,7 +12,7 @@ import (
 func main() {
 
 	log.SetHandler(cli.New(os.Stderr))
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	log.Info("Starting 🛰  спутник")
 	if err := cmd.RootCmd.Execute(); err != nil {

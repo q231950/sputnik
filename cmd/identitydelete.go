@@ -37,7 +37,11 @@ var identitydeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Attempting to remove the current identity...")
 		keyManager := keymanager.New()
-		if keyManager.SigningIdentityExists() {
+		exists, err := keyManager.SigningIdentityExists()
+		if err != nil {
+			log.Errorf("Error in SigningIdentityExists: %s", err)
+		}
+		if exists {
 			removeSigningIdentity(&keyManager)
 		} else {
 			log.Warn("There is no signing identity to remove.")

@@ -44,7 +44,11 @@ func init() {
 
 func createECKey() {
 	keyManager := keymanager.New()
-	exists := keyManager.SigningIdentityExists()
+	exists, err := keyManager.SigningIdentityExists()
+	if err != nil {
+		log.Errorf("Error in SigningIdentityExists: %s", err)
+	}
+
 	if exists {
 		log.Error("There is an existing identity. You need to remove it with `./sputnik identity remove` before you can create a new one.")
 		if len(keyManager.KeyID()) != 0 {

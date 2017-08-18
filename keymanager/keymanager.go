@@ -30,7 +30,6 @@ type KeyManager interface {
 type CloudKitKeyManager struct {
 	secretsFolder      string
 	pemFileName        string
-	derFileName        string
 	keyIDFileName      string
 	inMemoryKeyID      string
 	inMemoryPrivateKey *ecdsa.PrivateKey
@@ -45,19 +44,17 @@ func New() CloudKitKeyManager {
 	secretsFolder := strings.Join(components, "/")
 
 	keyIDFileName := "keyid.txt"
-	derFileName := "cert.der"
 	pemFileName := "eckey.pem"
 
-	return NewWithSecretsFolder(secretsFolder, keyIDFileName, derFileName, pemFileName)
+	return NewWithSecretsFolder(secretsFolder, keyIDFileName, pemFileName)
 }
 
 // NewWithSecretsFolder returns a CloudKitKeyManager with a specific secrets folder
 // Use this to specify a different storage location from the default
-func NewWithSecretsFolder(secretsFolder string, keyIDFileName string, derFileName string, pemFileName string) CloudKitKeyManager {
+func NewWithSecretsFolder(secretsFolder string, keyIDFileName string, pemFileName string) CloudKitKeyManager {
 	return CloudKitKeyManager{
 		secretsFolder: secretsFolder,
 		pemFileName:   pemFileName,
-		derFileName:   derFileName,
 		keyIDFileName: keyIDFileName}
 }
 
@@ -180,12 +177,6 @@ func (c *CloudKitKeyManager) keyIDFilePath() string {
 	return secretsFolder + "/" + c.keyIDFileName
 }
 
-// derFilePath represents the path to the DER encoded certificate
-func (c *CloudKitKeyManager) derFilePath() string {
-	secretsFolder := c.SecretsFolder()
-	return secretsFolder + "/" + c.derFileName
-}
-
 // pemFilePath represents the path to the PEM encoded certificate
 func (c *CloudKitKeyManager) pemFilePath() string {
 	secretsFolder := c.SecretsFolder()
@@ -211,14 +202,7 @@ func (c *CloudKitKeyManager) ECKey() string {
 //
 // You can paste the signing identity to your iCloud Dashboard when creating a new API Access Key.
 func (c *CloudKitKeyManager) CreateSigningIdentity() error {
-	err := c.createPemEncodedCertificate()
-	if err != nil {
-		return err
-	}
-
-	err = c.createDerEncodedCertificate()
-
-	return err
+	return c.createPemEncodedCertificate()
 }
 
 // RemoveSigningIdentity removes the existing signing identity
@@ -230,13 +214,6 @@ func (c *CloudKitKeyManager) RemoveSigningIdentity() error {
 	err := removePemCommand.Run()
 	if err != nil {
 		log.Error("Unable to remove PEM:")
-		log.Errorf("%s", err)
-	}
-
-	removeDerCommand := exec.Command("rm", c.derFilePath())
-	err = removeDerCommand.Run()
-	if err != nil {
-		log.Error("Unable to remove DER file")
 		log.Errorf("%s", err)
 	}
 
@@ -265,22 +242,6 @@ func (c *CloudKitKeyManager) createPemEncodedCertificate() error {
 	}
 
 	log.Info("Done creating PEM")
-
-	return err
-}
-
-// createDerEncodedCertificate converts the PEM encoded signing identity to DER and stores it
-func (c *CloudKitKeyManager) createDerEncodedCertificate() error {
-	log.Debugf("Creating DER...", c.pemFileName, c.derFileName, c.SecretsFolder())
-	inPathPem := c.SecretsFolder() + "/" + c.pemFileName
-	outPathDer := c.SecretsFolder() + "/" + c.derFileName
-	command := exec.Command("openssl", "ec", "-outform", "der", "-in", inPathPem, "-out", outPathDer)
-
-	err := command.Run()
-	if err != nil {
-		log.Error("Failed to create der encoded certificate")
-		log.Errorf("%s", err)
-	}
 
 	return err
 }

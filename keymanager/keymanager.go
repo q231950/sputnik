@@ -103,12 +103,10 @@ func (c *CloudKitKeyManager) PrivateKey() *ecdsa.PrivateKey {
 	if c.inMemoryPrivateKey != nil {
 		return c.inMemoryPrivateKey
 	}
-	path := c.derFilePath()
-	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Error("No der file found. create one by `sputnik eckey create`")
-		return nil
-	}
+
+	inPathPem := c.pemFilePath()
+	command := exec.Command("openssl", "ec", "-outform", "der", "-in", inPathPem)
+	bytes, _ := command.Output()
 
 	privateKey, err := x509.ParseECPrivateKey(bytes)
 	if err != nil {
@@ -129,7 +127,7 @@ func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 
 	var err error
 	var pub interface{}
-	pemString := c.PrivatePublicKeyWriter()
+	pemString := c.PublicKeyString()
 	pemData := []byte(pemString)
 	block, _ := pem.Decode(pemData)
 	if block == nil || block.Type != "PUBLIC KEY" {
@@ -152,14 +150,14 @@ func (c *CloudKitKeyManager) PublicKey() *ecdsa.PublicKey {
 	return nil
 }
 
-// PrivatePublicKeyWriter should be named differently. It reads and returns the PEM encoded signing identity
-func (c *CloudKitKeyManager) PrivatePublicKeyWriter() string {
+// PublicKeyString should be named differently. It reads and returns the public part of the PEM encoded signing identity
+func (c *CloudKitKeyManager) PublicKeyString() string {
 	ecKeyPath := c.pemFilePath()
 
 	command := exec.Command("openssl", "ec", "-in", ecKeyPath, "-pubout")
 	bytes, err := command.Output()
 	if err != nil {
-		log.Error("PrivatePublicKeyWriter")
+		log.Error("PublicKeyString")
 		log.Error("Failed to read the public key from PEM")
 		log.Errorf("%s", err)
 	}

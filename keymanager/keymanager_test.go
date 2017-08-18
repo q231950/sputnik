@@ -15,13 +15,13 @@ func TestNew(t *testing.T) {
 
 func TestStoredKeyID(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	assert.Equal(t, "abc\n", manager.KeyID(), "A stored key id should get found")
 }
 
 func TestPrivateKey(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 
 	expectedD := new(big.Int)
 	expectedD.SetString("57359333433306843951573675484597381433848383364258304847182053853963006392866", 10)
@@ -30,7 +30,7 @@ func TestPrivateKey(t *testing.T) {
 
 func TestPrivateKeyFromMemory(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 
 	privateKey := manager.PrivateKey()
 	privateKey = manager.PrivateKey()
@@ -41,7 +41,7 @@ func TestPrivateKeyFromMemory(t *testing.T) {
 
 func TestPublicKey(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 
 	publicKey := manager.PublicKey()
 	expectedX := new(big.Int)
@@ -55,7 +55,7 @@ func TestPublicKey(t *testing.T) {
 
 func TestPublicKeyFromMemory(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 
 	publicKey := manager.PublicKey()
 	publicKey = manager.PublicKey()
@@ -66,7 +66,7 @@ func TestPublicKeyFromMemory(t *testing.T) {
 
 func TestStoreKeyID(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyidCreateTest.txt", "certCreateTest.der", "eckeyTest.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyidCreateTest.txt", "eckeyTest.pem")
 
 	manager.StoreKeyID("key")
 	assert.Equal(t, "key", manager.KeyID(), "The key id should be stored correctly")
@@ -76,39 +76,30 @@ func TestStoreKeyID(t *testing.T) {
 
 func TestSigningIdentityExists(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	exists, _ := manager.SigningIdentityExists()
 	assert.True(t, exists, "The signing identity should exist in this fixture")
 }
 
 func TestECKey(t *testing.T) {
 	pathToFixtures := "./fixtures"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	expected := "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuTDvRjrfQW7CHI68iJBpBpRkhT0J\nKMKA7vaSPvkckv9za3l1ji2L0VsFSOIvSlgpUyC96pRxcIBR/E2gqmLbbA==\n-----END PUBLIC KEY-----\n"
 	assert.Equal(t, expected, manager.ECKey(), "The public key is not correct")
 }
 
 func TestCreateIdentity(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	err := manager.CreateSigningIdentity()
 	assert.Nil(t, err, "It should be possible to create a signing identity")
 
 	_ = os.RemoveAll("./testFiles")
 }
 
-func TestCreateIdentityDERError(t *testing.T) {
-	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "", "eckey.pem")
-	err := manager.CreateSigningIdentity()
-	assert.NotNil(t, err, "An error should occur when creating the signing identity fails due to a false der file name")
-
-	_ = os.RemoveAll("./testFiles")
-}
-
 func TestCreateIdentityPEMError(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "")
 	err := manager.CreateSigningIdentity()
 	assert.NotNil(t, err, "An error should occur when creating the signing identity fails due to a false pem file name")
 
@@ -117,7 +108,7 @@ func TestCreateIdentityPEMError(t *testing.T) {
 
 func TestRemovesECKeyKeyWhenRemovingSigningIdentity(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	_ = manager.CreateSigningIdentity()
 
 	manager.RemoveSigningIdentity()
@@ -129,7 +120,7 @@ func TestRemovesECKeyKeyWhenRemovingSigningIdentity(t *testing.T) {
 
 func TestRemovesPublicKeyWhenRemovingSigningIdentity(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	_ = manager.CreateSigningIdentity()
 
 	manager.RemoveSigningIdentity()
@@ -141,7 +132,7 @@ func TestRemovesPublicKeyWhenRemovingSigningIdentity(t *testing.T) {
 
 func TestRemovesPrivateKeyWhenRemovngSigningIdentity(t *testing.T) {
 	pathToFixtures := "./testFiles"
-	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "cert.der", "eckey.pem")
+	manager := NewWithSecretsFolder(pathToFixtures, "keyid.txt", "eckey.pem")
 	_ = manager.CreateSigningIdentity()
 
 	manager.RemoveSigningIdentity()

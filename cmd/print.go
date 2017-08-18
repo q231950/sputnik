@@ -46,12 +46,12 @@ to quickly create a Cobra application.`,
 			log.Errorf("Error in SigningIdentityExists: %s", err)
 		}
 		if exists {
-			log.Infof("Printing the public/private keys:\n%s", keyManager.PrivatePublicKeyWriter())
+			log.Infof("Printing the public/private keys:\n%s", keyManager.PublicKeyString())
 		} else {
 			log.Info("The ec key does not exist, need to create, one moment, please")
 			keyManager.CreateSigningIdentity()
 
-			log.Infof("Ok done. This is it: \n%s", keyManager.PrivatePublicKeyWriter())
+			log.Infof("Ok done. This is it: \n%s", keyManager.PublicKeyString())
 		}
 	},
 }

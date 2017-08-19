@@ -62,22 +62,3 @@ func TestSignMessage(t *testing.T) {
 		t.Errorf("A message should be signed when a private key is available")
 	}
 }
-
-// func TestSignature(t *testing.T) {
-//
-// 	keyManager := keymanager.MockKeyManager{}
-// 	config := NewRequestConfig("version", "containerID")
-// 	r := CloudkitRequestManager{keyManager, config}
-//   message := []byte("")
-//
-// 	bytes, err := ioutil.ReadFile("fixtures/test_identity.der")
-// 	priv, err := x509.ParseECPrivateKey(bytes)
-// 	if err != nil {
-// 		t.Errorf("Incorrect test setup %s", err)
-// 		t.Fail()
-// 	}
-// 	signature := r.SignatureForMessage(message, priv)
-// 	if string(signature) != "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=" {
-// 		t.Errorf("Signature is not correct")
-// 	}
-// }

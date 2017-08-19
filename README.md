@@ -8,39 +8,11 @@
 
 > **Sputnik** enables you to connect to CloudKit from within your Golang package using the Server-to-server communication that CloudKit provides.
 
-### Create a signing identity
-
-Talking to CloudKit requires authentication. Luckily, there is a command to create the signing identity for you.
-
-`./sputnik identity create`
-
-This will create a `eckey.pem` and `cert.der` and place it in the `~/.sputnik/secrets` folder.
-
-### Add public key to CloudKit Dashboard
-
-You may print out the key in a CloudKit understandable format. Copy the output and paste it as described in the **Storing the Server-to-Server Public Key and Getting the Key Identifier** section of [the reference](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html#//apple_ref/doc/uid/TP40015240-CH24-SW6)
-
-`./sputnik identity`
-
-### Store the CloudKit Key ID
-
-Once you added your public key to CloudKit's server-to-server keys you will get a Key ID for your client. You can store this key by either
-
-`./sputnik keyid store <your key id>`
-
-or setting the environment variable
-
-`SPUTNIK_CLOUDKIT_KEYID`
-
-### Remove an existing signing identity
-
-You can remove the Sputnik signing identity by
-
-`./sputnik identity remove`
-
-This will remove the signing identity local to your machine (any certificate & stored key ID) - it is up to you to revoke the key in the CloudKit Dashboard.
+**Sputnik** manages the most cumbersome part of CloudKit communication - the signing of your requests. For more information on signing have a look in the [Managing the Signing Identity](https://github.com/q231950/sputnik/wiki/Managing-the-Signing-Identity) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
 
 ### Usage
+
+You can use Sputnik either from the command line or as a package. For more information about requests have a look in the [Sending Requests](https://github.com/q231950/sputnik/wiki/Sending-Requests) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
 
 [Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert cities into iCloud. The following is assuming **json** to be some meaningful data.
 

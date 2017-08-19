@@ -8,24 +8,23 @@
 
 > **Sputnik** enables you to connect to CloudKit from within your Golang package using the Server-to-server communication that CloudKit provides.
 
-**Sputnik** manages the most cumbersome part of CloudKit communication - the signing of your requests. For more information on signing have a look in the [Managing the Signing Identity](https://github.com/q231950/sputnik/wiki/Managing-the-Signing-Identity) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
+### Signing Requests
+
+Sputnik manages the most cumbersome part of CloudKit communication - the signing of your requests. For more information on signing have a look in the [Managing the Signing Identity](https://github.com/q231950/sputnik/wiki/Managing-the-Signing-Identity) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
 
 ### Usage
 
-You can use Sputnik either from the command line or as a package. For more information about requests have a look in the [Sending Requests](https://github.com/q231950/sputnik/wiki/Sending-Requests) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
+You can use Sputnik either from [the command line](https://github.com/q231950/sputnik/wiki/Sending-Requests#the-sputnik-binary) or [as a package](https://github.com/q231950/sputnik/wiki/Sending-Requests#the-sputnik-package). For more information about requests have a look in the [Sending Requests](https://github.com/q231950/sputnik/wiki/Sending-Requests) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
 
-[Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert cities into iCloud. The following is assuming **json** to be some meaningful data.
+[Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert cities into CloudKit:
 
 ```go
 keyManager := keymanager.New()
-containerID := "iCloud.com.elbedev.bish"
-subpath := "records/modify"
-database := "public"
 
-config := requesthandling.RequestConfig{Version: "1", ContainerID: containerID}
-requestManager := requesthandling.New(config, &keyManager, database)
+config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.bish"}
+requestManager := requesthandling.New(config, &keyManager, "public")
 
-request, error := requestManager.PostRequest(subpath, json)
+request, error := requestManager.PostRequest("records/modify", json)
 client := &http.Client{}
 response, error := client.Do(request)
 ```

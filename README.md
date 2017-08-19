@@ -1,12 +1,12 @@
 # 🛰 спутник
 
-[![CircleCI](https://circleci.com/bb/q231950/sputnik/tree/master.svg?style=svg)](https://circleci.com/bb/q231950/sputnik/tree/master)
-
-![Go Report Card](https://goreportcard.com/badge/github.com/q231950/sputnik)
-
 ## Talk to  CloudKit. Server-to-server in Go.
 
 > **Sputnik** enables you to connect to CloudKit from within your Golang package using the Server-to-server communication that CloudKit provides.
+
+[![CircleCI](https://circleci.com/bb/q231950/sputnik/tree/master.svg?style=svg)](https://circleci.com/bb/q231950/sputnik/tree/master)
+
+![Go Report Card](https://goreportcard.com/badge/github.com/q231950/sputnik)
 
 ### Signing Requests
 

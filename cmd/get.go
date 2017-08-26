@@ -21,31 +21,35 @@
 package cmd
 
 import (
-	log "github.com/apex/log"
-
+	"github.com/apex/log"
 	"github.com/q231950/sputnik/keymanager"
+	"github.com/q231950/sputnik/requesthandling"
 	"github.com/spf13/cobra"
 )
 
-// keyidCmd represents the keyid command
-var keyidCmd = &cobra.Command{
-	Use:   "keyid",
-	Short: "Show the key ID that is currently in use",
-	Long: `You can provide a Cloudkit key ID by 2 methods
-	#1 use the Sputnik command 'keyid store <your key id>'
-	#2 by setting an environment variable 'SPUTNIK_CLOUDKIT_KEYID'`,
+// getCmd represents the get command
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Attempting to retrieve the current key id...")
+		log.WithField("Payload", payload).Info("Attempting to GET...")
 		keyManager := keymanager.New()
-		keyID := keyManager.KeyID()
-		if len(keyID) > 0 {
-			log.Infof("The following key id is stored: `%s`", keyID)
-		} else {
-			log.Error("No iCloud key id specified. Please either provide one by `sputnik keyid store <your KeyID>` or set the environment variable `SPUTNIK_CLOUDKIT_KEYID`.")
-		}
+		config := requesthandling.RequestConfig{}
+		requestManager := requesthandling.New(config, &keyManager)
+		requestManager.GetRequest("lookup", "{}")
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(keyidCmd)
+	requestsCmd.AddCommand(getCmd)
+
+	getCmd.Flags().StringVarP(&payloadFilePath, "json-file-path", "j", "", "A path to a file that contains the json payload")
+	getCmd.Flags().StringVarP(&payload, "payload", "p", "", "A json payload as string")
+	getCmd.Flags().StringVarP(&operation, "operation", "o", "", "The operation to execute: Depending on your intention, operation-specific subpaths may be of [modify, query, lookup, changes, resolve, accept]")
 }

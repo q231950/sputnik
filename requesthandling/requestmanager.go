@@ -1,3 +1,8 @@
+/*
+Package requesthandling offers means to create signed requests for interfacing with CloudKit.
+
+A Configuration is required to know the CloudKit container's properties, the KeyManager is required for signing requests.
+*/
 package requesthandling
 
 import (
@@ -29,7 +34,7 @@ const (
 // The RequestManager interface exposes methods for creating requests
 type RequestManager interface {
 	PostRequest(string, string) (*http.Request, error)
-	Request(path string, method HTTPMethod, payload string) (*http.Request, error)
+	GetRequest(string, string) (*http.Request, error)
 }
 
 // CloudkitRequestManager is the concrete implementation of RequestManager
@@ -45,11 +50,16 @@ func New(config RequestConfig, keyManager keymanager.KeyManager) CloudkitRequest
 
 // PostRequest is a convenience method for creating POST requests
 func (cm CloudkitRequestManager) PostRequest(operationPath string, body string) (*http.Request, error) {
-	return cm.Request(operationPath, "POST", body)
+	return cm.request(operationPath, POST, body)
+}
+
+// GetRequest is a convenience method for creating POST requests
+func (cm CloudkitRequestManager) GetRequest(operationPath string, body string) (*http.Request, error) {
+	return cm.request(operationPath, GET, body)
 }
 
 // Request creates a signed request with the given parameters
-func (cm *CloudkitRequestManager) Request(p string, method HTTPMethod, payload string) (*http.Request, error) {
+func (cm *CloudkitRequestManager) request(p string, method HTTPMethod, payload string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
@@ -110,7 +120,7 @@ func (cm *CloudkitRequestManager) SignatureForMessage(message []byte) (signature
 func (cm *CloudkitRequestManager) subpath(path string) string {
 	version := cm.Config.Version
 	containerID := cm.Config.ContainerID
-	components := []string{"/database", version, containerID, "development", cm.Config.Database, path}
+	components := []string{"/database", version, containerID, "development", cm.Config.Database, "records", path}
 	return strings.Join(components, "/")
 }
 

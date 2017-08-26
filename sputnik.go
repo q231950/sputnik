@@ -1,6 +1,6 @@
 package main
 
-import log "github.com/apex/log"
+import "github.com/apex/log"
 
 // Hello makes sure that the earth is still spinning around the sun
 func Hello() {

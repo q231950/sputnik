@@ -1,3 +1,8 @@
+/*
+Package requesthandling offers means to create signed requests for interfacing with CloudKit.
+
+A Configuration is required to know the CloudKit container's properties, the KeyManager is required for signing requests.
+*/
 package requesthandling
 
 import (

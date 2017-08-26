@@ -30,15 +30,10 @@ import (
 // printCmd represents the print command
 var printCmd = &cobra.Command{
 	Use:   "print",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Print the private key",
+	Long:  `Use this command to get the private key to paste into the CloudKit Dashboard when granting API access.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Attempting to print the identity")
+		log.Info("Attempting to print the private key.")
 
 		keyManager := keymanager.New()
 		exists, err := keyManager.SigningIdentityExists()

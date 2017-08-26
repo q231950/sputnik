@@ -21,31 +21,40 @@
 package cmd
 
 import (
-	log "github.com/apex/log"
+	"fmt"
+	"io/ioutil"
 
-	"github.com/q231950/sputnik/keymanager"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
-// keyidCmd represents the keyid command
-var keyidCmd = &cobra.Command{
-	Use:   "keyid",
-	Short: "Show the key ID that is currently in use",
-	Long: `You can provide a Cloudkit key ID by 2 methods
-	#1 use the Sputnik command 'keyid store <your key id>'
-	#2 by setting an environment variable 'SPUTNIK_CLOUDKIT_KEYID'`,
+var payloadFilePath string
+var payload string
+var operation string
+
+// requestsCmd represents the requests command
+var requestsCmd = &cobra.Command{
+	Use:   "requests",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Attempting to retrieve the current key id...")
-		keyManager := keymanager.New()
-		keyID := keyManager.KeyID()
-		if len(keyID) > 0 {
-			log.Infof("The following key id is stored: `%s`", keyID)
-		} else {
-			log.Error("No iCloud key id specified. Please either provide one by `sputnik keyid store <your KeyID>` or set the environment variable `SPUTNIK_CLOUDKIT_KEYID`.")
-		}
+		fmt.Println("requests called")
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(keyidCmd)
+	RootCmd.AddCommand(requestsCmd)
+}
+
+func payloadFromFile(path string) string {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Error(err.Error())
+	}
+	return string(bytes)
 }

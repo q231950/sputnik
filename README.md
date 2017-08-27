@@ -19,17 +19,16 @@ You can use Sputnik either from [the command line](https://github.com/q231950/sp
 ```go
 keyManager := keymanager.New()
 
-config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.elbedev.bish"}
-requestManager := requesthandling.New(config, &keyManager, "public")
+config := requesthandling.RequestConfig{Version: "1", ContainerID: "iCloud.com.some.bundle", Database: "public"}
+requestManager := requesthandling.New(config, &keyManager)
 
-request, error := requestManager.PostRequest("records/modify", json)
+request, error := requestManager.PostRequest("modify", json)
 client := &http.Client{}
 response, error := client.Do(request)
 ```
 
 ## State
 
-Even though this library works fine for [Baikonur](https://github.com/q231950/baikonur), please keep in mind that it's a [0.0.2](https://github.com/q231950/sputnik/releases).
-
+Please try this package and see how it works for you. Feedback and contributions are welcome <3
 
 ![Gemeinfrei, <a href="https://commons.wikimedia.org/w/index.php?curid=229349">Link</a>](resources/331px-Sputnik-stamp-ussr.jpg)

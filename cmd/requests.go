@@ -31,6 +31,7 @@ import (
 var payloadFilePath string
 var payload string
 var operation string
+var container string
 
 // requestsCmd represents the requests command
 var requestsCmd = &cobra.Command{

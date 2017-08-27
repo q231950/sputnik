@@ -64,22 +64,27 @@ var postCmd = &cobra.Command{
 		}
 
 		keyManager := keymanager.New()
-		config := requesthandling.RequestConfig{Version: "1", Database: "public", ContainerID: "iCloud.com.elbedev.bishcommunity"}
-		requestManager := requesthandling.New(config, &keyManager)
 
-		request, err := requestManager.PostRequest(operation, payloadToUse)
-		if err != nil {
-			log.Error(err.Error())
-		} else {
-			client := http.Client{}
-			resp, err := client.Do(request)
+		if container != "" {
+			config := requesthandling.RequestConfig{Version: "1", Database: "public", ContainerID: container}
+			requestManager := requesthandling.New(config, &keyManager)
+
+			request, err := requestManager.PostRequest(operation, payloadToUse)
 			if err != nil {
-				panic(err)
+				log.Error(err.Error())
 			} else {
-				body, _ := ioutil.ReadAll(resp.Body)
-				s, _ := json.MarshalIndent(string(body), "", "    ")
-				log.Info(string(s))
+				client := http.Client{}
+				resp, err := client.Do(request)
+				if err != nil {
+					panic(err)
+				} else {
+					body, _ := ioutil.ReadAll(resp.Body)
+					s, _ := json.MarshalIndent(string(body), "", "    ")
+					log.Info(string(s))
+				}
 			}
+		} else {
+			log.Error("Missing container, please provide one. See `sputnik help requests post`")
 		}
 	},
 }
@@ -89,4 +94,5 @@ func init() {
 	postCmd.Flags().StringVarP(&payloadFilePath, "json-file-path", "j", "", "A path to a file that contains the json payload")
 	postCmd.Flags().StringVarP(&payload, "payload", "p", "", "A json payload as string")
 	postCmd.Flags().StringVarP(&operation, "operation", "o", "", "The operation to execute: Depending on your intention, operation-specific subpaths may be of [modify, query, lookup, changes, resolve, accept]")
+	postCmd.Flags().StringVarP(&container, "container", "c", "", "The CloudKit container to access. (normally `iCloud.your.bundle.identifier`)")
 }

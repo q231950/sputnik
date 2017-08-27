@@ -1,0 +1,39 @@
+{
+   "operations":[
+      {
+         "operationType":"create",
+         "record":{
+            "recordType":"City",
+            "fields":{
+               "geonameid":{
+                  "value":"my id"
+               },
+               "name":{
+                  "value":"La Citta Nel Cielo"
+               },
+               "alternatenames":{
+                  "value":""
+               },
+               "location":{
+                  "value":{
+                     "latitude":40.0,
+                     "longitude":10.0
+                  }
+               },
+               "countrycode":{
+                  "value":"AU"
+               },
+               "population":{
+                  "value":500
+               },
+               "elevation":{
+                  "value":800
+               },
+               "timezone":{
+                  "value":"some"
+               }
+            }
+         }
+      }
+   ]
+}

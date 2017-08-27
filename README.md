@@ -2,9 +2,9 @@
 
 # 🛰 спутник
 
-## Talk to  CloudKit. Server-to-server in Go.
+## Talk to  CloudKit. Server-to-Server in Go.
 
-> **Sputnik** enables you to connect to CloudKit from within your Golang package using the Server-to-server communication that CloudKit provides.
+> **Sputnik** enables you to connect to CloudKit from within your Go package or application using CloudKit's Server-to-Server Web Service API. **Sputnik** handles request signing for you and offers ways to interact with CloudKit directly from the CLI.
 
 ### Signing Requests
 
@@ -14,7 +14,7 @@ Sputnik manages the most cumbersome part of CloudKit communication - the signing
 
 You can use Sputnik either from [the command line](https://github.com/q231950/sputnik/wiki/Sending-Requests#the-sputnik-binary) or [as a package](https://github.com/q231950/sputnik/wiki/Sending-Requests#the-sputnik-package). For more information about requests have a look in the [Sending Requests](https://github.com/q231950/sputnik/wiki/Sending-Requests) section of the [Wiki](https://github.com/q231950/sputnik/wiki).
 
-[Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert cities into CloudKit:
+[Baikonur](https://github.com/q231950/baikonur) uses Sputnik to insert city records into a CloudKit container:
 
 ```go
 keyManager := keymanager.New()

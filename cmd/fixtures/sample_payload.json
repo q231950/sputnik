@@ -1,6 +1,15 @@
 {
-  "query": {
-    "recordType":"City"
-  },
-  "resultsLimit": 1
+   "query":{
+      "recordType":"City",
+      "filterBy":[
+         {
+            "comparator":"EQUALS",
+            "fieldName":"name",
+            "fieldValue":{
+               "value":"Tokyo"
+            }
+         }
+      ]
+   },
+   "resultsLimit":1
 }

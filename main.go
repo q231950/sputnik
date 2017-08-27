@@ -14,7 +14,6 @@ func main() {
 	log.SetHandler(cli.New(os.Stderr))
 	log.SetLevel(log.InfoLevel)
 
-	log.Info("Starting 🛰  спутник")
 	if err := cmd.RootCmd.Execute(); err != nil {
 		log.Errorf("%s", err)
 		os.Exit(-1)

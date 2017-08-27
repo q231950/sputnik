@@ -55,7 +55,7 @@ var postCmd = &cobra.Command{
 
 		var payloadToUse string
 		if payloadFilePath != "" {
-			payloadToUse = payloadFromFile(payloadFilePath) //`{"query":{"recordType":"City"}}`
+			payloadToUse = payloadFromFile(payloadFilePath)
 			log.WithFields(log.Fields{
 				"Payload": payloadToUse}).Info("Payload from file")
 

@@ -30,10 +30,10 @@ import (
 // printCmd represents the print command
 var printCmd = &cobra.Command{
 	Use:   "print",
-	Short: "Print the private key",
-	Long:  `Use this command to get the private key to paste into the CloudKit Dashboard when granting API access.`,
+	Short: "Print the public key",
+	Long:  `Use this command to get the public key to paste into the CloudKit Dashboard when granting API access.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Attempting to print the private key.")
+		log.Info("Attempting to print the public key")
 
 		keyManager := keymanager.New()
 		exists, err := keyManager.SigningIdentityExists()
@@ -41,7 +41,7 @@ var printCmd = &cobra.Command{
 			log.Errorf("Error in SigningIdentityExists: %s", err)
 		}
 		if exists {
-			log.Infof("Printing the public/private keys:\n%s", keyManager.PublicKeyString())
+			log.Infof("Printing the public key\n%s", keyManager.PublicKeyString())
 		} else {
 			log.Info("The ec key does not exist, need to create, one moment, please")
 			keyManager.CreateSigningIdentity()

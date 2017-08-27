@@ -33,7 +33,7 @@ var eckeyCmd = &cobra.Command{
 	Short: "Show the signing identity",
 	Long:  `Show the signing identity that is used for signing the iCloud requests.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info("Attempting to retrieve the current identity...")
+		log.Debug("Attempting to retrieve the current identity...")
 		keyManager := keymanager.New()
 		keyExists, err := keyManager.SigningIdentityExists()
 		if err != nil {
@@ -43,7 +43,7 @@ var eckeyCmd = &cobra.Command{
 		if keyExists {
 			identity := keyManager.ECKey()
 			log.Debug("The current identity you can create a new server-to-server key with in the iCloud Dashboard:")
-			log.Debug(identity)
+			log.Infof("\n%s", identity)
 
 			keyID := keyManager.KeyID()
 			if len(keyID) == 0 {

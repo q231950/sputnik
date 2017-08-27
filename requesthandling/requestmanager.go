@@ -61,6 +61,7 @@ func (cm CloudkitRequestManager) GetRequest(operationPath string, body string) (
 // Request creates a signed request with the given parameters
 func (cm *CloudkitRequestManager) request(p string, method HTTPMethod, payload string) (*http.Request, error) {
 	keyID := cm.keyManager.KeyID()
+
 	currentDate := cm.formattedTime(time.Now())
 	path := cm.subpath(p)
 	hashedBody := cm.HashedBody(payload)
@@ -91,6 +92,7 @@ func (cm *CloudkitRequestManager) requestWithHeaders(method string, url string, 
 	request.Header.Set("X-Apple-CloudKit-Request-KeyID", keyID)
 	request.Header.Set("X-Apple-CloudKit-Request-ISO8601Date", date)
 	request.Header.Set("X-Apple-CloudKit-Request-SignatureV1", signature)
+	log.WithField("url", request.URL).Debug("Added headers to request")
 	return request, err
 }
 

@@ -1,0 +1,24 @@
+node {
+    ws("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/src/github.com/q231950/sputnik") {
+      def root = tool name: 'Go 1.9.2', type: 'go'
+      withEnv(["GOROOT=${root}", "GOPATH=${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/", "PATH+GO=${root}/bin"]) {
+          env.PATH="${GOPATH}/bin:$PATH"
+
+              stage("Clone") {
+                  checkout scm
+              }
+
+              stage("Get Dependencies") {
+                  sh 'go get -v'
+              }
+
+              stage("Get Test Dependencies") {
+                  sh "go get github.com/stretchr/testify/assert"
+              }
+
+              stage("Test") {
+                  sh 'go test ./... -v'
+              }
+          }
+      }
+}

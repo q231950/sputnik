@@ -20,6 +20,10 @@ node {
               stage("Test") {
                   sh 'go test ./... -v 2>&1 | go-junit-report > report.xml'
               }
+
+              stage("Publish Results") {
+                  junit '**/report.xml'
+              }
           }
-      }
-}
+     }
+   }

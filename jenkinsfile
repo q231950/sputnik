@@ -13,12 +13,17 @@ node {
               }
 
               stage("Get Test Dependencies") {
-                  sh "go get github.com/stretchr/testify/assert"
+                  sh "go get -u github.com/stretchr/testify/assert"
+                  sh "go get -u github.com/jstemmer/go-junit-report"
               }
 
               stage("Test") {
-                  sh 'go test ./... -v'
+                  sh 'go test ./... -v 2>&1 | go-junit-report > report.xml'
+              }
+
+              stage("Publish Results") {
+                  junit '**/report.xml'
               }
           }
-      }
-}
+     }
+   }

@@ -21,21 +21,24 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	log "github.com/apex/log"
+	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var verbose bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "sputnik",
-	Short: "sputnik talks to CloudKit",
-	Long: `спутник talks to CloudKit:
+	Short: "sputnik talks to iCloud",
+	Long: `спутник talks to iCloud:
 
 Easily communicate server to server using CloudKit in the app and Go in your backend.️`,
 }
@@ -52,7 +55,17 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sputnik.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sputnik/config.yaml)")
+	RootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose output.")
+
+	if verbose {
+		println("halleluja")
+		log.SetLevel(log.DebugLevel)
+	}
+
+	if err := viper.ReadInConfig(); err == nil {
+		log.Debugf("Using config file: `%s`", viper.ConfigFileUsed())
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -61,12 +74,15 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	}
 
-	viper.SetConfigName(".sputnik") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")    // adding home directory as first search path
-	viper.AutomaticEnv()            // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		log.Debugf("Using config file: `%s`", viper.ConfigFileUsed())
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+
+	fmt.Println(home)
+
+	viper.AddConfigPath("$HOME/.sputnik/")
+	viper.SetConfigName("config") // name of config file (without extension)
+	viper.AutomaticEnv()
 }

@@ -1,3 +1,5 @@
 .idea
 */.DS_Store
 sputnik
+go.mod
+go.sum
